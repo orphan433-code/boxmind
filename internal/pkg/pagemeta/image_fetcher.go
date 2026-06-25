@@ -11,6 +11,10 @@ func NewImageFetcher(extractor Extractor) *ImageFetcher {
 }
 
 func (f *ImageFetcher) FetchImageURL(ctx context.Context, rawURL string) (string, error) {
+	if thumb := PlatformThumbnailURL(rawURL); thumb != "" {
+		return thumb, nil
+	}
+
 	page, err := f.extractor.Extract(ctx, rawURL)
 	if err != nil {
 		return "", err

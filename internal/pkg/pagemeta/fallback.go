@@ -62,17 +62,7 @@ func FallbackEnrichment(ctx context.Context, extractor Extractor, rawURL string)
 }
 
 func enrichmentFromKnownURL(rawURL string) (domain.BookmarkEnrichment, bool) {
-	parsed, err := url.Parse(rawURL)
-	if err != nil {
-		return domain.BookmarkEnrichment{}, false
-	}
-
-	host := strings.ToLower(parsed.Hostname())
-	if strings.Contains(host, "rezka") {
-		return enrichmentFromHDRezkaURL(parsed)
-	}
-
-	return domain.BookmarkEnrichment{}, false
+	return GenericURLHints(rawURL)
 }
 
 func enrichmentFromHDRezkaURL(parsed *url.URL) (domain.BookmarkEnrichment, bool) {

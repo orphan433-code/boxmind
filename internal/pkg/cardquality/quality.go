@@ -1,0 +1,211 @@
+package cardquality
+
+import (
+	"strings"
+	"unicode/utf8"
+
+	"pet-link/internal/domain"
+	"pet-link/internal/pkg/gemini"
+	"pet-link/internal/pkg/pagemeta"
+)
+
+const (
+	minGoodScore     = 7
+	minAcceptScore   = 5
+	maxDescription   = 100
+	targetDescription = 90
+)
+
+var seoTitleMarkers = []string{
+	"смотреть онлайн",
+	"watch online",
+	"— смотреть",
+	" - смотреть",
+}
+
+// Score estimates how complete and usable a bookmark card is.
+func Score(e domain.BookmarkEnrichment, imageURL string) int {
+	score := 0
+
+	if GoodTitle(e.Title) {
+		score += 2
+	}
+	if GoodDescription(e.Description) {
+		score += 2
+	}
+	if e.Category != "" && e.Category != "other" {
+		score += 2
+	}
+	if len(e.Tags) >= 2 {
+		score += 2
+	}
+	if strings.TrimSpace(imageURL) != "" {
+		score += 1
+	}
+	if !gemini.IsUnavailableEnrichment(e) {
+		score += 1
+	}
+
+	return score
+}
+
+// IsGoodEnough reports whether enrichment can stop retrying.
+func IsGoodEnough(e domain.BookmarkEnrichment, imageURL string) bool {
+	return Score(e, imageURL) >= minGoodScore
+}
+
+// IsAcceptable is a softer threshold for partial saves after retries.
+func IsAcceptable(e domain.BookmarkEnrichment, imageURL string) bool {
+	s := Score(e, imageURL)
+	if s >= minAcceptScore && GoodTitle(e.Title) && len(e.Tags) >= 2 && e.Category != "" && e.Category != "other" {
+		return true
+	}
+	return s >= minGoodScore
+}
+
+func GoodTitle(title string) bool {
+	title = pagemeta.CleanPageTitle(strings.TrimSpace(title))
+	if title == "" {
+		return false
+	}
+	if strings.HasPrefix(title, "http://") || strings.HasPrefix(title, "https://") {
+		return false
+	}
+	lower := strings.ToLower(title)
+	for _, marker := range seoTitleMarkers {
+		if strings.Contains(lower, marker) {
+			return false
+		}
+	}
+	return utf8.RuneCountInString(title) >= 2
+}
+
+func GoodDescription(description string) bool {
+	description = strings.TrimSpace(description)
+	if description == "" {
+		return false
+	}
+	if gemini.IsUnavailableEnrichment(domain.BookmarkEnrichment{Description: description}) {
+		return false
+	}
+	if strings.HasSuffix(description, "…") {
+		return false
+	}
+	if utf8.RuneCountInString(description) > maxDescription {
+		return false
+	}
+	return true
+}
+
+// Merge combines enrichment layers without degrading a good card.
+func Merge(base, patch domain.BookmarkEnrichment) domain.BookmarkEnrichment {
+	patch = gemini.NormalizeEnrichment(patch)
+	out := base
+
+	if title := pickTitle(base.Title, patch.Title); title != "" {
+		out.Title = title
+	}
+	if desc := pickDescription(base.Description, patch.Description); desc != "" {
+		out.Description = desc
+	}
+	if cat := pickCategory(base.Category, patch.Category); cat != "" {
+		out.Category = cat
+	}
+	if tags := pickTags(base.Tags, patch.Tags); len(tags) > 0 {
+		out.Tags = tags
+	}
+
+	return out
+}
+
+func pickTitle(base, patch string) string {
+	base = pagemeta.CleanPageTitle(strings.TrimSpace(base))
+	patch = pagemeta.CleanPageTitle(strings.TrimSpace(patch))
+
+	if patch == "" {
+		return base
+	}
+	if base == "" {
+		return patch
+	}
+	if GoodTitle(base) && !GoodTitle(patch) {
+		return base
+	}
+	if !GoodTitle(base) && GoodTitle(patch) {
+		return patch
+	}
+	if titleScore(base) >= titleScore(patch) {
+		return base
+	}
+	return patch
+}
+
+func titleScore(title string) int {
+	score := 0
+	if GoodTitle(title) {
+		score += 3
+	}
+	// Prefer shorter, cleaner titles.
+	score += max(0, 40-utf8.RuneCountInString(title)/2)
+	return score
+}
+
+func pickDescription(base, patch string) string {
+	base = strings.TrimSpace(base)
+	patch = strings.TrimSpace(patch)
+
+	if patch == "" || !GoodDescription(patch) {
+		if GoodDescription(base) {
+			return base
+		}
+		return ""
+	}
+	if base == "" || !GoodDescription(base) {
+		return patch
+	}
+	if descScore(base) >= descScore(patch) {
+		return base
+	}
+	return patch
+}
+
+func descScore(description string) int {
+	score := 0
+	if GoodDescription(description) {
+		score += 4
+	}
+	runes := utf8.RuneCountInString(description)
+	if runes <= targetDescription {
+		score += 2
+	}
+	if strings.HasSuffix(description, ".") || strings.HasSuffix(description, "!") || strings.HasSuffix(description, "?") {
+		score += 1
+	}
+	return score
+}
+
+func pickCategory(base, patch string) string {
+	base = strings.TrimSpace(base)
+	patch = strings.TrimSpace(patch)
+
+	if patch != "" && patch != "other" {
+		return patch
+	}
+	if base != "" {
+		return base
+	}
+	return patch
+}
+
+func pickTags(base, patch []string) []string {
+	if len(patch) >= 2 {
+		return patch
+	}
+	if len(base) >= 2 {
+		return base
+	}
+	if len(patch) > len(base) {
+		return patch
+	}
+	return base
+}

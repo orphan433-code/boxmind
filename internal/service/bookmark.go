@@ -10,7 +10,9 @@ import (
 
 	"pet-link/internal/domain"
 	"pet-link/internal/pkg/bookmarkurl"
+	"pet-link/internal/pkg/cardquality"
 	"pet-link/internal/pkg/gemini"
+	"pet-link/internal/pkg/pagemeta"
 )
 
 type BookmarkRepository interface {
@@ -106,6 +108,12 @@ func (s *bookmarkService) Create(ctx context.Context, userID string, input domai
 
 	s.applyQuickFallback(ctx, &input)
 
+	if input.ImageURL == "" {
+		if thumb := pagemeta.PlatformThumbnailURL(input.URL); thumb != "" {
+			input.ImageURL = thumb
+		}
+	}
+
 	if input.Title == "" {
 		input.Title = input.URL
 	}
@@ -200,9 +208,12 @@ func (s *bookmarkService) enrichAsync(userID, bookmarkID, rawURL string) {
 
 				if err == nil && !gemini.IsUnavailableEnrichment(enrichment) {
 					finished := s.finishEnrichment(ctx, rawURL, hints, enrichment)
-					if s.tryPersistEnrichment(ctx, userID, bookmarkID, finished) {
+					imageURL := s.bookmarkImageURL(ctx, userID, bookmarkID)
+					s.tryPersistEnrichment(ctx, userID, bookmarkID, finished)
+					if cardquality.IsGoodEnough(finished, imageURL) {
 						return
 					}
+					hints = finished
 				}
 
 				if err != nil {
@@ -236,7 +247,7 @@ func (s *bookmarkService) loadEnrichmentHints(ctx context.Context, userID, bookm
 }
 
 func (s *bookmarkService) finishEnrichment(ctx context.Context, rawURL string, hints, enrichment domain.BookmarkEnrichment) domain.BookmarkEnrichment {
-	merged := mergeEnrichment(hints, gemini.NormalizeEnrichment(enrichment))
+	merged := cardquality.Merge(hints, gemini.NormalizeEnrichment(enrichment))
 	if !needsClassification(merged) {
 		return merged
 	}
@@ -251,7 +262,7 @@ func (s *bookmarkService) finalizeEnrichment(ctx context.Context, userID, bookma
 
 	if s.metaFallback != nil {
 		if fallback, ok := s.metaFallback.FallbackEnrich(metaCtx, rawURL); ok {
-			merged = mergeEnrichment(merged, gemini.NormalizeEnrichment(fallback))
+			merged = cardquality.Merge(merged, gemini.NormalizeEnrichment(fallback))
 		}
 	}
 
@@ -259,13 +270,20 @@ func (s *bookmarkService) finalizeEnrichment(ctx context.Context, userID, bookma
 		merged = s.classifyAndMerge(ctx, rawURL, merged)
 	}
 
-	if !s.tryPersistEnrichment(ctx, userID, bookmarkID, merged) {
-		return
-	}
+	imageURL := s.bookmarkImageURL(ctx, userID, bookmarkID)
+	s.tryPersistEnrichment(ctx, userID, bookmarkID, merged)
 
-	if needsClassification(merged) {
+	if !cardquality.IsAcceptable(merged, imageURL) {
 		log.Printf("bookmark enrich exhausted for %s", rawURL)
 	}
+}
+
+func (s *bookmarkService) bookmarkImageURL(ctx context.Context, userID, bookmarkID string) string {
+	bookmark, err := s.repo.GetByIDForUser(ctx, userID, bookmarkID)
+	if err != nil {
+		return ""
+	}
+	return bookmark.ImageURL
 }
 
 func (s *bookmarkService) classifyAndMerge(ctx context.Context, rawURL string, base domain.BookmarkEnrichment) domain.BookmarkEnrichment {
@@ -286,7 +304,7 @@ func (s *bookmarkService) classifyAndMerge(ctx context.Context, rawURL string, b
 		return base
 	}
 
-	return mergeEnrichment(base, gemini.NormalizeEnrichment(classified))
+	return cardquality.Merge(base, gemini.NormalizeEnrichment(classified))
 }
 
 func enrichmentFromBookmark(bookmark domain.Bookmark) domain.BookmarkEnrichment {
@@ -299,27 +317,7 @@ func enrichmentFromBookmark(bookmark domain.Bookmark) domain.BookmarkEnrichment 
 }
 
 func mergeEnrichment(base, patch domain.BookmarkEnrichment) domain.BookmarkEnrichment {
-	out := base
-
-	if title := strings.TrimSpace(patch.Title); title != "" {
-		out.Title = title
-	}
-	if desc := strings.TrimSpace(patch.Description); desc != "" && !gemini.IsUnavailableEnrichment(domain.BookmarkEnrichment{Description: desc}) {
-		out.Description = desc
-	}
-
-	patchCategory := strings.TrimSpace(patch.Category)
-	if patchCategory != "" && patchCategory != "other" {
-		out.Category = patchCategory
-	} else if strings.TrimSpace(out.Category) == "" {
-		out.Category = patchCategory
-	}
-
-	if len(patch.Tags) > 0 {
-		out.Tags = patch.Tags
-	}
-
-	return out
+	return cardquality.Merge(base, patch)
 }
 
 func needsClassification(enrichment domain.BookmarkEnrichment) bool {
