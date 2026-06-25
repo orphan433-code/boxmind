@@ -1,0 +1,195 @@
+Analyze the webpage at this URL: %s
+
+Return ONLY valid JSON with exactly these fields: title, description, category, tags.
+
+If you CANNOT access or read the page (403, blocked, empty, error, paywall):
+- If the URL itself clearly identifies the content — derive title, category, tags from URL. Do NOT use the joke fallback.
+  hdrezka.co / hdrezka.ag / rezka.ag:
+    /films/ -> category: movies, first tag: фильм
+    /series/ -> category: movies, first tag: сериал
+    genre folder in path (fiction, thriller, horrors, dramas, comedies, anime, ...) -> second tag (фантастика, триллер, ужасы, драма, комедия, аниме, ...)
+    title from slug: drop numeric id prefix, drop -latest and year suffix, decode translit to readable title
+    e.g. .../films/fiction/82305-mandalorec-i-grogu-2026-latest.html
+      -> title: "Мандалорец и Гроугу", category: movies, tags: ["фильм", "фантастика"]
+- Only if URL gives no clue — use unavailable fallback:
+- Do NOT invent or guess content from thin air. Never hallucinate title, plot, or tags.
+- Use a playful, light tone in Russian — as if the page "refused" to open.
+- title: short funny line, e.g. "Сайт не в настроении", "Страница закрылась", "Тут закрыто"
+- description: one witty sentence, e.g. "Не пустили — сохранил ссылку, загляни сам." or "Страница стесняется, содержимое не показала."
+- category: other
+- tags: ["ссылка", "недоступно"]
+
+Only use real content when you actually read the page, or when deriving from URL using the rules above.
+
+Title rules:
+- Write the name of the content itself (movie, product, article, tool), not the page or website.
+- Do NOT include: site name, "watch online", "free", city, seller name, SEO phrases.
+- Keep it short and readable, max 70 characters.
+- Example: "Каратель: Последнее убийство" not "Фильм Каратель смотреть онлайн на HDRezka".
+
+Description rules:
+- Read the page synopsis/plot, then write YOUR OWN ultra-short summary.
+- Exactly ONE complete sentence, max 100 characters (hard limit).
+- Must end naturally with . ! or ? — never cut mid-phrase.
+- Do NOT copy long text from the page. Compress the idea into a few words.
+- Describe WHAT this is, not WHERE it is hosted or HOW to use the site.
+- Good: "Аниме о юноше без магии, который пробивается к вершине в мире чародейства."
+- Bad: "Аниме-сериал о юноше без магии, который прокладывает себе путь к вершине волшебного мира с помощью"
+
+Category rules:
+- Pick ONE exact value from:
+  programming, design, news, gaming, movies, shopping, articles, learning, music, tools, entertainment, other
+
+Classification algorithm (FOLLOW IN THIS ORDER — main rule):
+
+Step 1 — What does the USER DO on this page? Category = action/format, NOT topic.
+  WATCH video (film, series, anime, vlog, documentary, interview, clip) -> movies or entertainment
+  STUDY / learn (course, lesson, tutorial, lecture, how-to, sheet music to practice) -> learning
+  READ text (wiki, blog, longread, reference) -> articles
+  READ news article (text on a news site) -> news
+  LISTEN to music (track, album, playlist) -> music
+  USE while coding (official docs, API reference, package readme) -> programming
+  PLAY or read about games -> gaming
+  SHOP (product listing, store) -> shopping
+
+Step 2 — What is it ABOUT? Topic goes in tag #2 only — never pick category from topic alone.
+
+Common mistakes to avoid:
+  WRONG: politics / war / current events topic -> news (when user WATCHES a video)
+  RIGHT: watch political video -> entertainment, tags: ["видео", "политика"]
+
+  WRONG: golang / react / python topic -> programming (when user STUDIES via course or tutorial)
+  RIGHT: YouTube golang course -> learning, tags: ["курс", "golang"]
+
+  WRONG: film or anime topic -> articles (when user WATCHES on a streaming page)
+  RIGHT: watch anime -> movies, tags: ["аниме", "фэнтези"]
+
+Same platform — different categories (decide by Step 1, not by domain):
+  youtube.com + full course / урок / лекция -> learning
+  youtube.com + how-to tutorial -> learning
+  youtube.com + film / vlog / documentary / politics / interview -> entertainment or movies
+  bbc.com + text article -> news
+  go.dev/doc -> programming
+  leetcode.com/u/<user> or github.com/<user> profile -> programming
+
+Page type details:
+- movies -> ONLY pages where the user WATCHES video: streaming, online cinema, video player, watch episode.
+- NOT movies even if the page is ABOUT a film/series/anime:
+  Wikipedia, IMDb info, encyclopedia, reviews, articles, news, forums, fan wikis, promo sites without a player.
+- articles -> READ text: Wikipedia, encyclopedia, blog post, review, longread, reference page, fan wiki
+- learning -> tutorials, courses, lessons, how-to guides, sheet music / scores / tabs to practice (NOT Wikipedia)
+- music -> listen to or download songs: streaming, albums, artists, playlists, track pages, music services
+- NOT music: sheet music scores (use learning + tag ноты), music theory tutorials (use learning)
+- news -> READ a news article on a news site (text to read). NOT a video about news.
+- NOT entertainment: sheet music, MuseScore, tutorials — use learning; song/album/stream pages — use music, not entertainment
+- Review or blog post -> articles (tags: статья, обзор, ...)
+
+Programming vs learning (apply Step 1 — both can be about code, category differs by action):
+- learning -> user STUDIES something: курс, урок, туториал, гайд, лекция, playlist to learn.
+  Even if the topic is Go, Python, or React — a course or tutorial is learning, NOT programming.
+- programming -> user USES a tool while coding: official docs, API reference, package readme, language spec.
+  NOT programming: video courses, YouTube lessons, step-by-step tutorials — those are learning.
+- Example: "Полный курс по Golang" on YouTube -> learning, tags: ["курс", "golang"]
+- Example: go.dev/doc or pkg.go.dev -> programming, tags: ["документация", "golang"]
+
+Examples:
+- HDRezka page to watch a series -> movies, tags: ["сериал", "драма"]
+- Wikipedia article about a series -> articles, tags: ["статья", "сериал"]
+- MuseScore piano sheet music -> learning, tags: ["ноты", "классика"]
+- Spotify track or album -> music, tags: ["трек", "поп"]
+- Go tutorial step-by-step -> learning, tags: ["туториал", "golang"]
+- Go documentation -> programming, tags: ["документация", "golang"]
+- LeetCode profile -> programming, tags: ["профиль", "программирование"]
+
+Tags rules:
+- Return exactly 2 tags — no more, no less:
+  1) content type (аниме, фильм, сериал, ноты, трек, статья, туториал, …)
+  2) main genre or topic (фэнтези, ужасы, поп, golang, …)
+
+- Good pairs: ["аниме", "фэнтези"], ["фильм", "ужасы"], ["сериал", "драма"], ["ноты", "классика"]
+- Do NOT add a third tag. Pick the single best genre only.
+
+- Tags MUST be in Russian. Lowercase only.
+- NEVER use English tags: tutorial, guide, lesson, sheet-music, sheet music, course, review, article.
+  Use Russian instead: туториал, гайд, урок, ноты, курс, обзор, статья.
+
+- Pick ONE content-type tag that matches the page — do not mix types:
+  sheet music / scores / tabs -> ноты (NOT туториал, NOT sheet-music)
+  step-by-step how-to -> туториал or гайд (NOT ноты)
+
+- For movies / watch pages use content type from:
+  фильм, сериал, аниме, дорама, ova, мультфильм, документалка, видео
+
+- For articles / reading use content type:
+  статья, обзор, справка, longread
+
+- For learning / education use content type:
+  туториал, курс, гайд, урок, ноты
+
+- For music / listening use content type:
+  трек, песня, альбом, плейлист, артист, саундтрек
+
+- For music genres use labels such as:
+  поп, рок, инди, джаз, классика, электроника, хип-хоп, метал, фолк, r&b
+
+- For genres use common labels such as:
+  фантастика, фэнтези, драма, мелодрама, комедия, боевик, триллер, ужасы, приключения, романтика, детектив, биография
+
+- For other categories:
+  programming/design/tools (Полезное) -> STRICT tags:
+    first tag ONLY one of: профиль, документация, инструмент, репозиторий
+    second tag ONLY one of: программирование, frontend, backend, infra, devops, облако, дизайн, продуктивность, аналитика
+    if unsure -> ["инструмент", "программирование"]
+    NEVER use generic tags like ссылка, разное, контент for these categories
+  programming -> документация, справка, профиль разработчика + topic (golang, react, devops). NEVER курс, урок, туториал here.
+  shopping -> товар + category (hardware, electronics, одежда)
+  news -> новость + topic (tech, politics, sport)
+  gaming -> игра, гайд, обзор + genre or platform
+
+- Do NOT use: franchise names, character names, universe titles, site names, cities, "online", random topics like "космос" or "nvidia" when a genre fits better.
+
+Examples:
+- Star Wars film watch page -> category: movies, tags: ["фильм", "фантастика"]
+- Wikipedia about Star Wars -> category: articles, tags: ["статья", "фильм"]
+- Anime fantasy stream -> category: movies, tags: ["аниме", "фэнтези"]
+- Horror film stream -> category: movies, tags: ["фильм", "ужасы"]
+- GPU listing -> category: shopping, tags: ["товар", "hardware"]
+- Go docs -> category: programming, tags: ["документация", "golang"]
+- YouTube full Go course for beginners -> category: learning, tags: ["курс", "golang"]
+- YouTube political documentary / news topic video -> category: entertainment, tags: ["видео", "политика"]
+- MuseScore score -> category: learning, tags: ["ноты", "классика"]
+- Spotify / Apple Music track -> category: music, tags: ["трек", "поп"]
+
+Known sites (apply when URL matches — same rules every time):
+- musescore.com, ultimate-guitar.com (tabs/scores):
+  category: learning
+  tags: ["ноты", genre or instrument] — e.g. ["ноты", "классика"], ["ноты", "пианино"]
+  NEVER: entertainment, music, tutorial, sheet-music, туториал as first tag
+- open.spotify.com, spotify.com, music.apple.com, music.yandex.ru, music.yandex.com,
+  soundcloud.com, bandcamp.com, deezer.com, tidal.com, music.youtube.com,
+  boom.ru, zvuk.com, vk.com/audio:
+  category: music
+  tags: [трек|песня|альбом|плейлист, genre] — e.g. ["трек", "рок"], ["альбом", "инди"]
+  NEVER: learning, ноты, entertainment as category
+- song download / mp3 pages (any domain):
+  category: music
+  first tag: песня or трек
+- wikipedia.org, ru.wikipedia.org:
+  category: articles
+  first tag: статья
+- leetcode.com, github.com (profile pages):
+  category: programming
+  tags: ["профиль", "программирование"]
+- youtube.com / youtu.be (always apply Step 1 first — learning and watch both exist on YouTube):
+  course / урок / лекция / "полный курс" / tutorial playlist -> learning (tags: курс|урок|туториал, topic)
+  step-by-step how-to video -> learning, tags: ["туториал", topic]
+  film / series / anime / vlog / documentary / interview / politics / news topic -> movies or entertainment
+  e.g. "Полный курс по Golang" -> learning, tags: ["курс", "golang"]
+  e.g. political YouTube video -> entertainment, tags: ["видео", "политика"]
+  NEVER pick news or articles just because topic is political — user watches, not reads
+  NEVER programming for courses — topic can be golang, action is study -> learning
+
+Use the same language as the page content for title and description.
+Tags: always Russian, lowercase.
+
+Do not include markdown or extra text.

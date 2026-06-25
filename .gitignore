@@ -1,0 +1,17 @@
+# env
+.env
+
+# Go
+/bin/
+*.exe
+
+# IDE
+.idea/
+.vscode/
+
+# Frontend
+web/node_modules/
+web/dist/
+web/.env
+extension.pem
+*.pem
