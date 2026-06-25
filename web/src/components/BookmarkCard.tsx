@@ -45,20 +45,20 @@ export function BookmarkCard({
 
       <div className="bookmark-card-overlay" />
 
-      {enriching && (
-        <span className="ai-badge" title="AI обрабатывает ссылку">
-          <span className="ai-badge-spinner" aria-hidden="true" />
-          AI
-        </span>
-      )}
-
       <div className="bookmark-card-content">
         <div className="bookmark-card-top">
           <div className="bookmark-card-badges">
-            {showIntent && (
-              <span className="intent-badge">
-                {intentLabelForCategory(bookmark.category)}
+            {enriching ? (
+              <span className="ai-badge" title="AI обрабатывает ссылку">
+                <span className="ai-badge-spinner" aria-hidden="true" />
+                AI
               </span>
+            ) : (
+              showIntent && (
+                <span className="intent-badge">
+                  {intentLabelForCategory(bookmark.category)}
+                </span>
+              )
             )}
           </div>
           <button

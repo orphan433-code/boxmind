@@ -26,9 +26,13 @@ Title rules:
 - Do NOT include: site name, "watch online", "free", city, seller name, SEO phrases.
 - Keep it short and readable, max 70 characters.
 - Example: "Каратель: Последнее убийство" not "Фильм Каратель смотреть онлайн на HDRezka".
+- Language: if the title exists in Russian (e.g. a bilingual video/page title with a "/" or both languages), ALWAYS pick the Russian variant and drop the English duplicate.
+- If the content has only an English/original name and no Russian one, keep the original — do NOT translate proper names.
+- Never output both languages at once. Pick one: Russian when available, otherwise the original.
 
 Description rules:
-- Read the page synopsis/plot, then write YOUR OWN ultra-short summary.
+- ALWAYS write the description in Russian, no matter what language the page or title is in.
+- Read the page synopsis/plot, then write YOUR OWN ultra-short summary in Russian.
 - Exactly ONE complete sentence, max 100 characters (hard limit).
 - Must end naturally with . ! or ? — never cut mid-phrase.
 - Do NOT copy long text from the page. Compress the idea into a few words.
@@ -189,7 +193,9 @@ Known sites (apply when URL matches — same rules every time):
   NEVER pick news or articles just because topic is political — user watches, not reads
   NEVER programming for courses — topic can be golang, action is study -> learning
 
-Use the same language as the page content for title and description.
-Tags: always Russian, lowercase.
+Language summary (STRICT):
+- description: ALWAYS Russian.
+- title: Russian if a Russian variant exists, otherwise keep the original name. Never mix two languages.
+- tags: always Russian, lowercase.
 
 Do not include markdown or extra text.
