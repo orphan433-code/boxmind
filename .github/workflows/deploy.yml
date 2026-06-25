@@ -11,9 +11,9 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  APP_HOST: app.164.92.184.65.sslip.io
-  API_HOST: api.164.92.184.65.sslip.io
-  API_URL: https://api.164.92.184.65.sslip.io/api/v1
+  APP_HOST: app.boxmind.link
+  API_HOST: api.boxmind.link
+  API_URL: https://api.boxmind.link/api/v1
   API_IMAGE: ghcr.io/orphan433-code/boxmind-api
   WEB_IMAGE: ghcr.io/orphan433-code/boxmind-web
 

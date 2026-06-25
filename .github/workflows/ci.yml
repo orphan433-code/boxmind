@@ -39,5 +39,5 @@ jobs:
       - name: Build web
         working-directory: web
         env:
-          VITE_API_URL: https://api.164.92.184.65.sslip.io/api/v1
+          VITE_API_URL: https://api.boxmind.link/api/v1
         run: npm run build

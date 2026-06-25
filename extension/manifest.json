@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Boxmind",
-  "version": "0.4.3",
+  "version": "0.5.1",
   "description": "Закинь ссылку в ящик — AI сам разложит",
   "icons": {
     "16": "icons/icon16.png",
@@ -22,6 +22,7 @@
   "content_scripts": [
     {
       "matches": [
+        "https://app.boxmind.link/*",
         "http://localhost:5173/*",
         "http://127.0.0.1:5173/*"
       ],
@@ -31,6 +32,7 @@
   ],
   "permissions": ["storage", "tabs", "activeTab", "scripting"],
   "host_permissions": [
+    "https://api.boxmind.link/*",
     "http://localhost:8080/*",
     "http://127.0.0.1:8080/*"
   ]

@@ -1,5 +1,5 @@
-const DEFAULT_API_URL = "http://localhost:8080/api/v1";
-const APP_URL = "http://localhost:5173";
+const DEFAULT_API_URL = "https://api.boxmind.link/api/v1";
+const APP_URL = "https://app.boxmind.link";
 const STORAGE = {
   token: "boxmindToken",
   user: "boxmindUser",
