@@ -46,6 +46,16 @@ func TestIsUnavailableEnrichment(t *testing.T) {
 			want: true,
 		},
 		{
+			name: "joke description with real category",
+			input: domain.BookmarkEnrichment{
+				Title:       "Ходячие мертвецы",
+				Description: "Страница стесняется, содержимое не показала.",
+				Category:    "movies",
+				Tags:        []string{"сериал", "ужасы"},
+			},
+			want: true,
+		},
+		{
 			name: "real other bookmark",
 			input: domain.BookmarkEnrichment{
 				Category: "other",

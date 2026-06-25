@@ -44,7 +44,7 @@ func FallbackEnrichment(ctx context.Context, extractor Extractor, rawURL string)
 		page, err := extractor.Extract(ctx, rawURL)
 		if err == nil && strings.TrimSpace(page.Title) != "" {
 			enrichment := domain.BookmarkEnrichment{
-				Title:       page.Title,
+				Title:       CleanPageTitle(page.Title),
 				Description: page.Description,
 			}
 			if hints, ok := enrichmentFromKnownURL(rawURL); ok {

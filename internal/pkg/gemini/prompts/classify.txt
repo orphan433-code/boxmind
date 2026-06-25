@@ -1,0 +1,20 @@
+Classify this saved bookmark using your general knowledge. You do NOT need to access the URL.
+
+URL: %s
+Title: %s
+Description: %s
+
+Return ONLY valid JSON with exactly these fields: title, description, category, tags.
+
+Rules:
+- Use what you know about the work/topic from the title and description.
+- If the title looks like SEO junk ("смотреть онлайн", site name), return a clean content title instead.
+- description: one Russian sentence about the content (plot/topic). If you only know the genre, describe that briefly. Max 100 chars.
+- category: ONE of programming, design, news, gaming, movies, shopping, articles, learning, music, tools, entertainment, other
+- tags: exactly 2 Russian lowercase tags — content type + genre/topic (e.g. ["аниме", "комедия"], ["сериал", "ужасы"])
+- For anime streaming pages -> movies, tags like ["аниме", genre]
+- For film/series watch pages -> movies
+- For YouTube videos -> entertainment or learning or movies depending on content type
+- title: Russian if available, otherwise original. Never mix languages.
+
+Do not use joke/fallback text. If unsure about genre, still pick the best category and tags from the title.

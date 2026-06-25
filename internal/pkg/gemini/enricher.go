@@ -124,14 +124,25 @@ func (e *Enricher) generateEnrichment(ctx context.Context, prompt string, config
 	}, nil
 }
 
-// IsUnavailableEnrichment reports the AI "page blocked" fallback payload.
+// IsUnavailableEnrichment reports joke/blocked fallback payloads that must not be saved.
 func IsUnavailableEnrichment(enrichment domain.BookmarkEnrichment) bool {
-	if enrichment.Category != "other" {
-		return false
-	}
-
 	for _, tag := range enrichment.Tags {
 		if tag == "недоступно" {
+			return true
+		}
+	}
+
+	desc := strings.ToLower(enrichment.Description)
+	jokePhrases := []string{
+		"стесняется",
+		"не пустили",
+		"не в настроении",
+		"закрылась",
+		"загляни сам",
+		"содержимое не показала",
+	}
+	for _, phrase := range jokePhrases {
+		if strings.Contains(desc, phrase) {
 			return true
 		}
 	}

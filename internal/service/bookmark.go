@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -24,6 +25,7 @@ type BookmarkRepository interface {
 
 type BookmarkEnricher interface {
 	Enrich(ctx context.Context, rawURL string) (domain.BookmarkEnrichment, error)
+	Classify(ctx context.Context, pageURL, title, description string) (domain.BookmarkEnrichment, error)
 }
 
 type BookmarkImageFetcher interface {
@@ -40,6 +42,7 @@ type BookmarkService interface {
 const (
 	imageFetchTimeout    = 4 * time.Second
 	quickMetaTimeout     = 2 * time.Second
+	metaFallbackTimeout  = 8 * time.Second
 	enrichAttemptTimeout = 20 * time.Second
 	enrichTotalTimeout   = 4 * time.Minute
 	enrichMaxAttempts    = 8
@@ -175,6 +178,11 @@ func (s *bookmarkService) enrichAsync(userID, bookmarkID, rawURL string) {
 		ctx, cancel := context.WithTimeout(context.Background(), enrichTotalTimeout)
 		defer cancel()
 
+		hints, ok := s.loadEnrichmentHints(ctx, userID, bookmarkID)
+		if !ok {
+			return
+		}
+
 		for attempt := 1; attempt <= enrichMaxAttempts; attempt++ {
 			if s.enricher != nil {
 				attemptCtx, attemptCancel := context.WithTimeout(ctx, enrichAttemptTimeout)
@@ -182,10 +190,10 @@ func (s *bookmarkService) enrichAsync(userID, bookmarkID, rawURL string) {
 				attemptCancel()
 
 				if err == nil && !gemini.IsUnavailableEnrichment(enrichment) {
-					if err := s.persistEnrichment(ctx, userID, bookmarkID, enrichment); err != nil {
-						log.Printf("bookmark enrich update failed for %s: %v", rawURL, err)
+					finished := s.finishEnrichment(ctx, rawURL, hints, enrichment)
+					if s.tryPersistEnrichment(ctx, userID, bookmarkID, finished) {
+						return
 					}
-					return
 				}
 
 				if err != nil {
@@ -206,20 +214,124 @@ func (s *bookmarkService) enrichAsync(userID, bookmarkID, rawURL string) {
 			}
 		}
 
-		fallbackCtx, fallbackCancel := context.WithTimeout(context.Background(), quickMetaTimeout)
-		defer fallbackCancel()
-
-		if s.metaFallback != nil {
-			if fallback, ok := s.metaFallback.FallbackEnrich(fallbackCtx, rawURL); ok {
-				if err := s.persistEnrichment(ctx, userID, bookmarkID, gemini.NormalizeEnrichment(fallback)); err != nil {
-					log.Printf("bookmark enrich fallback update failed for %s: %v", rawURL, err)
-				}
-				return
-			}
-		}
-
-		log.Printf("bookmark enrich exhausted for %s", rawURL)
+		s.finalizeEnrichment(ctx, userID, bookmarkID, rawURL, hints)
 	}()
+}
+
+func (s *bookmarkService) loadEnrichmentHints(ctx context.Context, userID, bookmarkID string) (domain.BookmarkEnrichment, bool) {
+	bookmark, err := s.repo.GetByIDForUser(ctx, userID, bookmarkID)
+	if err != nil {
+		return domain.BookmarkEnrichment{}, false
+	}
+	return enrichmentFromBookmark(bookmark), true
+}
+
+func (s *bookmarkService) finishEnrichment(ctx context.Context, rawURL string, hints, enrichment domain.BookmarkEnrichment) domain.BookmarkEnrichment {
+	merged := mergeEnrichment(hints, gemini.NormalizeEnrichment(enrichment))
+	if !needsClassification(merged) {
+		return merged
+	}
+	return s.classifyAndMerge(ctx, rawURL, merged)
+}
+
+func (s *bookmarkService) finalizeEnrichment(ctx context.Context, userID, bookmarkID, rawURL string, hints domain.BookmarkEnrichment) {
+	merged := hints
+
+	metaCtx, metaCancel := context.WithTimeout(ctx, metaFallbackTimeout)
+	defer metaCancel()
+
+	if s.metaFallback != nil {
+		if fallback, ok := s.metaFallback.FallbackEnrich(metaCtx, rawURL); ok {
+			merged = mergeEnrichment(merged, gemini.NormalizeEnrichment(fallback))
+		}
+	}
+
+	if merged.Title != "" || merged.Description != "" {
+		merged = s.classifyAndMerge(ctx, rawURL, merged)
+	}
+
+	if !s.tryPersistEnrichment(ctx, userID, bookmarkID, merged) {
+		return
+	}
+
+	if needsClassification(merged) {
+		log.Printf("bookmark enrich exhausted for %s", rawURL)
+	}
+}
+
+func (s *bookmarkService) classifyAndMerge(ctx context.Context, rawURL string, base domain.BookmarkEnrichment) domain.BookmarkEnrichment {
+	if s.enricher == nil || !needsClassification(base) {
+		return base
+	}
+
+	classifyCtx, cancel := context.WithTimeout(ctx, enrichAttemptTimeout)
+	defer cancel()
+
+	classified, err := s.enricher.Classify(classifyCtx, rawURL, base.Title, base.Description)
+	if err != nil {
+		log.Printf("bookmark classify failed for %s: %v", rawURL, err)
+		return base
+	}
+
+	if gemini.IsUnavailableEnrichment(classified) {
+		return base
+	}
+
+	return mergeEnrichment(base, gemini.NormalizeEnrichment(classified))
+}
+
+func enrichmentFromBookmark(bookmark domain.Bookmark) domain.BookmarkEnrichment {
+	return domain.BookmarkEnrichment{
+		Title:       bookmark.Title,
+		Description: bookmark.Description,
+		Category:    bookmark.Category,
+		Tags:        bookmark.Tags,
+	}
+}
+
+func mergeEnrichment(base, patch domain.BookmarkEnrichment) domain.BookmarkEnrichment {
+	out := base
+
+	if title := strings.TrimSpace(patch.Title); title != "" {
+		out.Title = title
+	}
+	if desc := strings.TrimSpace(patch.Description); desc != "" && !gemini.IsUnavailableEnrichment(domain.BookmarkEnrichment{Description: desc}) {
+		out.Description = desc
+	}
+
+	patchCategory := strings.TrimSpace(patch.Category)
+	if patchCategory != "" && patchCategory != "other" {
+		out.Category = patchCategory
+	} else if strings.TrimSpace(out.Category) == "" {
+		out.Category = patchCategory
+	}
+
+	if len(patch.Tags) > 0 {
+		out.Tags = patch.Tags
+	}
+
+	return out
+}
+
+func needsClassification(enrichment domain.BookmarkEnrichment) bool {
+	if enrichment.Title == "" && enrichment.Description == "" {
+		return false
+	}
+	if len(enrichment.Tags) >= 2 && enrichment.Category != "" && enrichment.Category != "other" {
+		return false
+	}
+	return true
+}
+
+func (s *bookmarkService) tryPersistEnrichment(ctx context.Context, userID, bookmarkID string, enrichment domain.BookmarkEnrichment) bool {
+	if err := s.persistEnrichment(ctx, userID, bookmarkID, enrichment); err != nil {
+		if errors.Is(err, domain.ErrBookmarkNotFound) {
+			return true
+		}
+		log.Printf("bookmark enrich update failed: %v", err)
+		return false
+	}
+	return true
 }
 
 func enrichRetryDelay(attempt int) time.Duration {
