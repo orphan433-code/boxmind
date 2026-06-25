@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from "react";
 import type { Bookmark } from "../types";
 import { intentLabelForCategory } from "../utils/browseSections";
+import { isBookmarkEnriching } from "../utils/enrichment";
 
 type Props = {
   bookmark: Bookmark;
@@ -21,6 +22,7 @@ export function BookmarkCard({
 }: Props) {
   const [imageOk, setImageOk] = useState(Boolean(bookmark.image_url));
   const hasImage = imageOk && Boolean(bookmark.image_url);
+  const enriching = isBookmarkEnriching(bookmark);
 
   return (
     <article
@@ -42,6 +44,13 @@ export function BookmarkCard({
       )}
 
       <div className="bookmark-card-overlay" />
+
+      {enriching && (
+        <span className="ai-badge" title="AI обрабатывает ссылку">
+          <span className="ai-badge-spinner" aria-hidden="true" />
+          AI
+        </span>
+      )}
 
       <div className="bookmark-card-content">
         <div className="bookmark-card-top">

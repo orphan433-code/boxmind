@@ -19,6 +19,7 @@ import {
   showIntentOnCards,
   type BrowseSectionId,
 } from "../utils/browseSections";
+import { isBookmarkEnriching } from "../utils/enrichment";
 import { normalizeSearchQuery, searchBookmarks } from "../utils/search";
 import { bookmarkUrlsMatch } from "../utils/url";
 
@@ -57,15 +58,7 @@ export function DashboardPage() {
   }, [loadBookmarks]);
 
   const needsEnrichmentRefresh = useMemo(
-    () =>
-      bookmarks.some((bookmark) => {
-        const createdAt = new Date(bookmark.created_at).getTime();
-        const isFresh = Date.now() - createdAt < 3 * 60 * 1000;
-        const looksPending =
-          bookmark.category === "other" &&
-          (!bookmark.description || bookmark.title === bookmark.url);
-        return isFresh && looksPending;
-      }),
+    () => bookmarks.some(isBookmarkEnriching),
     [bookmarks],
   );
 
@@ -76,7 +69,7 @@ export function DashboardPage() {
       void listBookmarks(token)
         .then((data) => setBookmarks(data))
         .catch(() => {});
-    }, 5000);
+    }, 4000);
 
     return () => window.clearInterval(intervalId);
   }, [token, needsEnrichmentRefresh]);
