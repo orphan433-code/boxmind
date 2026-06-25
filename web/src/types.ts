@@ -14,6 +14,7 @@ export type Bookmark = {
   image_url: string;
   category: string;
   tags: string[];
+  enriched: boolean;
   created_at: string;
   updated_at: string;
 };

@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	defaultTimeout   = 10 * time.Second
-	imageTimeout     = 4 * time.Second
+	defaultTimeout   = 12 * time.Second
+	imageTimeout     = 15 * time.Second
 	defaultMaxBytes  = 2 << 20 // 2 MB
 	defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 )

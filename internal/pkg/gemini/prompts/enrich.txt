@@ -33,8 +33,9 @@ Title rules:
 Description rules:
 - ALWAYS write the description in Russian, no matter what language the page or title is in.
 - Read the page synopsis/plot, then write YOUR OWN ultra-short summary in Russian.
-- Exactly ONE complete sentence, max 100 characters (hard limit).
-- Must end naturally with . ! or ? — never cut mid-phrase.
+- Exactly ONE complete sentence, max 90 characters (hard limit). Shorter is better.
+- Keep it brief — describe the gist, not every plot detail. Stop early instead of listing.
+- Must end naturally with . ! or ? — never a run-on, never cut mid-phrase.
 - Do NOT copy long text from the page. Compress the idea into a few words.
 - Describe WHAT this is, not WHERE it is hosted or HOW to use the site.
 - Good: "Аниме о юноше без магии, который пробивается к вершине в мире чародейства."

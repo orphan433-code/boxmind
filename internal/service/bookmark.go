@@ -20,6 +20,7 @@ type BookmarkRepository interface {
 	GetByIDForUser(ctx context.Context, userID, bookmarkID string) (domain.Bookmark, error)
 	UpdateImageURL(ctx context.Context, userID, bookmarkID, imageURL string) error
 	UpdateEnrichment(ctx context.Context, userID, bookmarkID string, enrichment domain.BookmarkEnrichment) error
+	MarkEnriched(ctx context.Context, userID, bookmarkID string) error
 	Delete(ctx context.Context, userID, bookmarkID string) error
 }
 
@@ -40,9 +41,9 @@ type BookmarkService interface {
 }
 
 const (
-	imageFetchTimeout    = 4 * time.Second
+	imageFetchTimeout    = 16 * time.Second
 	quickMetaTimeout     = 2 * time.Second
-	metaFallbackTimeout  = 8 * time.Second
+	metaFallbackTimeout  = 12 * time.Second
 	enrichAttemptTimeout = 20 * time.Second
 	enrichTotalTimeout   = 4 * time.Minute
 	enrichMaxAttempts    = 8
@@ -182,6 +183,14 @@ func (s *bookmarkService) enrichAsync(userID, bookmarkID, rawURL string) {
 		if !ok {
 			return
 		}
+
+		defer func() {
+			markCtx, markCancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer markCancel()
+			if err := s.repo.MarkEnriched(markCtx, userID, bookmarkID); err != nil && !errors.Is(err, domain.ErrBookmarkNotFound) {
+				log.Printf("bookmark mark enriched failed for %s: %v", rawURL, err)
+			}
+		}()
 
 		for attempt := 1; attempt <= enrichMaxAttempts; attempt++ {
 			if s.enricher != nil {
