@@ -12,10 +12,20 @@ Title rules:
 - Do NOT include: site name, "watch online", "free", city, seller name, SEO phrases.
 - Keep it short and readable, max 70 characters.
 - Example: "Каратель: Последнее убийство" not "Фильм Каратель смотреть онлайн на HDRezka".
-- If the title is a transliteration of Russian (Latin letters spelling Russian words, e.g. "Vse Chto Ty Lyubish"), rewrite it in proper Russian ("Всё, что ты любишь").
-- If you recognize the work/film/show, use its official or commonly used Russian title.
-- If the content has only an English/original name and no Russian one, keep the original — do NOT translate proper names, brands, song titles.
-- Never output both languages at once. Pick one: Russian when available, otherwise the original.
+
+Title language policy (IMPORTANT — do not translate by default):
+- PRESERVE the original title AS-IS by default. Do NOT translate a readable title.
+- KEEP the original for: YouTube/video titles, songs, playlists, articles, brands, products, channel names,
+  and any title already written in Japanese, English, Korean, Chinese, etc.
+- If BOTH a Russian and an original variant appear in one string (e.g. "ENGLISH / РУССКОЕ"),
+  pick the Russian one and drop the duplicate. This is SELECTION, not translation.
+- ONLY rewrite the title when it is clearly broken:
+  - a transliteration of Russian (Latin letters spelling Russian words) — e.g. "Vse Chto Ty Lyubish" -> "Всё, что ты любишь"
+  - SEO junk ("смотреть онлайн", "watch online", "free", site name)
+  - a raw URL or slug instead of a real name
+  - "- YouTube" or a similar placeholder
+- When you rewrite a transliterated/slug title, output proper Russian.
+- Never output two languages mixed together.
 
 Description rules:
 - ALWAYS write the description in Russian, no matter what language the title is in.
@@ -185,7 +195,8 @@ Known sites (apply when URL matches — same rules every time):
 
 Language summary (STRICT):
 - description: ALWAYS Russian.
-- title: Russian if a Russian variant exists, otherwise keep the original name. Never mix two languages.
+- title: PRESERVE the original by default. Only rewrite broken titles (transliteration, SEO junk, URL/slug, placeholder).
+  Do not translate readable original titles (YouTube, songs, brands, foreign-language names). Never mix two languages.
 - tags: always Russian, lowercase.
 
 Do not use joke/fallback text. If unsure about genre, still pick the best category and tags from the title and URL path.

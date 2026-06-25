@@ -3,7 +3,6 @@ package pagemeta
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -57,12 +56,11 @@ func youtubeOEmbed(ctx context.Context, client *http.Client, rawURL string) (Pag
 		return Page{}, false
 	}
 
+	// Intentionally no description: the generic "video by <author>" line carries no
+	// meaning and pollutes classification. A real Russian summary is produced later by AI.
 	page := Page{
 		Title:    title,
 		ImageURL: strings.TrimSpace(parsed.ThumbnailURL),
-	}
-	if author := strings.TrimSpace(parsed.AuthorName); author != "" {
-		page.Description = fmt.Sprintf("Видео на YouTube от %s.", author)
 	}
 
 	return page, true
