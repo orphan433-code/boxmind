@@ -34,6 +34,24 @@ var mediaGenreTags = map[string]string{
 	"sport":       "спорт",
 }
 
+var contentTypeKeywords = map[string]string{
+	"films":      "фильм",
+	"film":       "фильм",
+	"series":     "сериал",
+	"serial":     "сериал",
+	"serials":    "сериал",
+	"cartoons":   "мультфильм",
+	"cartoon":    "мультфильм",
+	"animation":  "мультфильм",
+	"multfilmy":  "мультфильм",
+	"anime":      "аниме",
+	"aniserials": "аниме",
+	"video":      "видео",
+	"videos":     "видео",
+	"show":       "шоу",
+	"shows":      "шоу",
+}
+
 // PlatformThumbnailURL returns a direct thumbnail URL for known platforms.
 func PlatformThumbnailURL(rawURL string) string {
 	if id := youtubeVideoID(rawURL); id != "" {
@@ -42,36 +60,37 @@ func PlatformThumbnailURL(rawURL string) string {
 	return ""
 }
 
-// GenericURLHints derives title/category/tags from common media URL shapes.
+// GenericURLHints derives a title from the URL path and optionally category/tags
+// when common media path keywords are present. Works for any site, not just one host.
 func GenericURLHints(rawURL string) (domain.BookmarkEnrichment, bool) {
 	parsed, err := url.Parse(rawURL)
 	if err != nil {
 		return domain.BookmarkEnrichment{}, false
 	}
 
-	host := strings.ToLower(parsed.Hostname())
-	if strings.Contains(host, "rezka") {
-		return enrichmentFromHDRezkaURL(parsed)
-	}
-
 	segments := splitPathSegments(parsed.Path)
-	if len(segments) < 2 {
+	if len(segments) == 0 {
 		return domain.BookmarkEnrichment{}, false
 	}
 
-	contentType, genreSegment, slug := mediaPathParts(segments)
-	if contentType == "" || slug == "" {
+	slug := segments[len(segments)-1]
+	if !isMeaningfulSlug(slug) {
 		return domain.BookmarkEnrichment{}, false
 	}
 
-	title := titleFromMediaSlug(slug)
+	title := titleFromSlug(slug)
 	if title == "" {
 		return domain.BookmarkEnrichment{}, false
 	}
 
-	firstTag := contentType
-	if strings.Contains(host, "anime") || strings.Contains(strings.Join(segments, "/"), "anime") {
-		firstTag = "аниме"
+	enrichment := domain.BookmarkEnrichment{
+		Title:    title,
+		Category: "other",
+	}
+
+	contentType, genreSegment := detectMediaPath(segments)
+	if contentType == "" {
+		return enrichment, true
 	}
 
 	genreTag := "драма"
@@ -81,11 +100,9 @@ func GenericURLHints(rawURL string) (domain.BookmarkEnrichment, bool) {
 		}
 	}
 
-	return domain.BookmarkEnrichment{
-		Title:    title,
-		Category: "movies",
-		Tags:     []string{firstTag, genreTag},
-	}, true
+	enrichment.Category = "movies"
+	enrichment.Tags = []string{contentType, genreTag}
+	return enrichment, true
 }
 
 func youtubeVideoID(rawURL string) string {
@@ -105,18 +122,13 @@ func youtubeVideoID(rawURL string) string {
 	}
 }
 
-func mediaPathParts(segments []string) (contentType, genreSegment, slug string) {
+func detectMediaPath(segments []string) (contentType, genreSegment string) {
 	for i, seg := range segments {
-		switch strings.ToLower(seg) {
-		case "films", "film":
-			return "фильм", genreAt(segments, i), lastSlug(segments)
-		case "series", "serial", "serials":
-			return "сериал", genreAt(segments, i), lastSlug(segments)
-		case "anime", "aniserials", "cartoon", "cartoons", "video", "videos", "watch":
-			return "аниме", genreAt(segments, i), lastSlug(segments)
+		if ct, ok := contentTypeKeywords[strings.ToLower(seg)]; ok {
+			return ct, genreAt(segments, i)
 		}
 	}
-	return "", "", ""
+	return "", ""
 }
 
 func genreAt(segments []string, kindIndex int) string {
@@ -124,15 +136,4 @@ func genreAt(segments []string, kindIndex int) string {
 		return ""
 	}
 	return segments[kindIndex+1]
-}
-
-func lastSlug(segments []string) string {
-	if len(segments) == 0 {
-		return ""
-	}
-	return segments[len(segments)-1]
-}
-
-func titleFromMediaSlug(slug string) string {
-	return titleFromHDRezkaSlug(slug)
 }

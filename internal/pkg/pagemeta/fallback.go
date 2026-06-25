@@ -2,7 +2,6 @@ package pagemeta
 
 import (
 	"context"
-	"net/url"
 	"regexp"
 	"strings"
 	"unicode"
@@ -12,33 +11,20 @@ import (
 
 var yearSuffixPattern = regexp.MustCompile(`-\d{4}$`)
 
-var hdrezkaGenreTags = map[string]string{
-	"fiction":    "фантастика",
-	"fantasy":    "фэнтези",
-	"thriller":   "триллер",
-	"horrors":    "ужасы",
-	"horror":     "ужасы",
-	"dramas":     "драма",
-	"drama":      "драма",
-	"comedies":   "комедия",
-	"comedy":     "комедия",
-	"action":     "боевик",
-	"melodramas": "мелодрама",
-	"melodrama":  "мелодрама",
-	"detective":  "детектив",
-	"cartoons":   "мультфильм",
-	"cartoon":    "мультфильм",
-	"anime":      "аниме",
-	"adventures": "приключения",
-	"adventure":  "приключения",
-	"biography":  "биография",
-	"documentary": "документалка",
-	"family":     "семейный",
-	"military":   "военный",
-	"sport":      "спорт",
+var junkSlugs = map[string]struct{}{
+	"index":      {},
+	"index.html": {},
+	"login":      {},
+	"register":   {},
+	"signup":     {},
+	"auth":       {},
+	"search":     {},
+	"home":       {},
+	"api":        {},
+	"watch":      {},
 }
 
-// FallbackEnrichment tries HTTP metadata, then URL-based hints for known blocked sites.
+// FallbackEnrichment tries HTTP metadata, then URL-based hints.
 func FallbackEnrichment(ctx context.Context, extractor Extractor, rawURL string) (domain.BookmarkEnrichment, bool) {
 	if extractor != nil {
 		page, err := extractor.Extract(ctx, rawURL)
@@ -48,6 +34,9 @@ func FallbackEnrichment(ctx context.Context, extractor Extractor, rawURL string)
 				Description: page.Description,
 			}
 			if hints, ok := enrichmentFromKnownURL(rawURL); ok {
+				if enrichment.Title == "" {
+					enrichment.Title = hints.Title
+				}
 				enrichment.Category = hints.Category
 				enrichment.Tags = hints.Tags
 			}
@@ -65,42 +54,6 @@ func enrichmentFromKnownURL(rawURL string) (domain.BookmarkEnrichment, bool) {
 	return GenericURLHints(rawURL)
 }
 
-func enrichmentFromHDRezkaURL(parsed *url.URL) (domain.BookmarkEnrichment, bool) {
-	segments := splitPathSegments(parsed.Path)
-	if len(segments) < 3 {
-		return domain.BookmarkEnrichment{}, false
-	}
-
-	kind := segments[0]
-	if kind != "films" && kind != "series" {
-		return domain.BookmarkEnrichment{}, false
-	}
-
-	contentType := "фильм"
-	if kind == "series" {
-		contentType = "сериал"
-	}
-
-	genreTag := "драма"
-	if len(segments) >= 2 {
-		if tag, ok := hdrezkaGenreTags[strings.ToLower(segments[1])]; ok {
-			genreTag = tag
-		}
-	}
-
-	slug := segments[len(segments)-1]
-	title := titleFromHDRezkaSlug(slug)
-	if title == "" {
-		return domain.BookmarkEnrichment{}, false
-	}
-
-	return domain.BookmarkEnrichment{
-		Title:    title,
-		Category: "movies",
-		Tags:     []string{contentType, genreTag},
-	}, true
-}
-
 func splitPathSegments(path string) []string {
 	parts := strings.Split(strings.Trim(path, "/"), "/")
 	segments := make([]string, 0, len(parts))
@@ -113,7 +66,38 @@ func splitPathSegments(path string) []string {
 	return segments
 }
 
-func titleFromHDRezkaSlug(slug string) string {
+func isMeaningfulSlug(slug string) bool {
+	normalized := strings.ToLower(strings.TrimSpace(slug))
+	if normalized == "" {
+		return false
+	}
+	if _, junk := junkSlugs[normalized]; junk {
+		return false
+	}
+
+	clean := strings.TrimSuffix(normalized, ".html")
+	clean = strings.TrimSuffix(clean, "-latest")
+	clean = yearSuffixPattern.ReplaceAllString(clean, "")
+
+	if dash := strings.Index(clean, "-"); dash > 0 && isDigits(clean[:dash]) {
+		clean = clean[dash+1:]
+	}
+
+	if len([]rune(clean)) < 4 {
+		return false
+	}
+
+	hasLetter := false
+	for _, r := range clean {
+		if unicode.IsLetter(r) {
+			hasLetter = true
+			break
+		}
+	}
+	return hasLetter
+}
+
+func titleFromSlug(slug string) string {
 	slug = strings.TrimSuffix(strings.ToLower(slug), ".html")
 	slug = strings.TrimSuffix(slug, "-latest")
 	slug = yearSuffixPattern.ReplaceAllString(slug, "")
