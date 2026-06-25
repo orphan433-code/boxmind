@@ -44,6 +44,8 @@ type BookmarkService interface {
 
 const (
 	imageFetchTimeout    = 16 * time.Second
+	imageFetchAttempts   = 3
+	imageFetchRetryDelay = 2 * time.Second
 	quickMetaTimeout     = 2 * time.Second
 	metaFallbackTimeout  = 12 * time.Second
 	enrichAttemptTimeout = 20 * time.Second
@@ -144,20 +146,30 @@ func (s *bookmarkService) fetchImageAsync(userID, bookmarkID, rawURL string) {
 	}
 
 	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), imageFetchTimeout)
-		defer cancel()
+		var lastErr error
+		for attempt := 1; attempt <= imageFetchAttempts; attempt++ {
+			ctx, cancel := context.WithTimeout(context.Background(), imageFetchTimeout)
+			imageURL, err := s.imageFetcher.FetchImageURL(ctx, rawURL)
+			cancel()
 
-		imageURL, err := s.imageFetcher.FetchImageURL(ctx, rawURL)
-		if err != nil {
-			log.Printf("bookmark image fetch failed for %s: %v", rawURL, err)
-			return
-		}
-		if imageURL == "" {
-			return
+			if err == nil && imageURL != "" {
+				updateCtx, updateCancel := context.WithTimeout(context.Background(), 5*time.Second)
+				err := s.repo.UpdateImageURL(updateCtx, userID, bookmarkID, imageURL)
+				updateCancel()
+				if err != nil {
+					log.Printf("bookmark image update failed for %s: %v", rawURL, err)
+				}
+				return
+			}
+
+			lastErr = err
+			if attempt < imageFetchAttempts {
+				time.Sleep(imageFetchRetryDelay * time.Duration(attempt))
+			}
 		}
 
-		if err := s.repo.UpdateImageURL(ctx, userID, bookmarkID, imageURL); err != nil {
-			log.Printf("bookmark image update failed for %s: %v", rawURL, err)
+		if lastErr != nil {
+			log.Printf("bookmark image fetch failed for %s: %v", rawURL, lastErr)
 		}
 	}()
 }
