@@ -259,7 +259,12 @@ func (s *bookmarkService) loadEnrichmentHints(ctx context.Context, userID, bookm
 }
 
 func (s *bookmarkService) finishEnrichment(ctx context.Context, rawURL string, hints, enrichment domain.BookmarkEnrichment) domain.BookmarkEnrichment {
-	merged := cardquality.Merge(hints, contentOnlyEnrichment(gemini.NormalizeEnrichment(enrichment)))
+	// Keep the rich classification from the main Enrich step (it reads the page
+	// with the detailed prompt). Only fall back to Classify when it's still missing.
+	merged := cardquality.Merge(hints, gemini.NormalizeEnrichment(enrichment))
+	if classificationComplete(merged) {
+		return merged
+	}
 	return s.classifyAndMerge(ctx, rawURL, merged)
 }
 
@@ -329,6 +334,12 @@ func mergeEnrichment(base, patch domain.BookmarkEnrichment) domain.BookmarkEnric
 
 func hasContentForClassification(enrichment domain.BookmarkEnrichment) bool {
 	return strings.TrimSpace(enrichment.Title) != "" || strings.TrimSpace(enrichment.Description) != ""
+}
+
+// classificationComplete reports whether the card already has a confident
+// category and tags, so the lighter Classify pass can be skipped.
+func classificationComplete(enrichment domain.BookmarkEnrichment) bool {
+	return enrichment.Category != "" && enrichment.Category != "other" && len(enrichment.Tags) >= 2
 }
 
 func contentOnlyEnrichment(enrichment domain.BookmarkEnrichment) domain.BookmarkEnrichment {
