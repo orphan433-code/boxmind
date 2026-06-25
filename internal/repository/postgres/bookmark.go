@@ -32,6 +32,9 @@ func (r *BookmarkRepository) Create(ctx context.Context, userID string, input do
 		&b.ID, &b.UserID, &b.URL, &b.Title, &b.Description, &b.ImageURL, &b.Category, &b.Tags, &b.CreatedAt, &b.UpdatedAt,
 	)
 	if err != nil {
+		if isUniqueViolation(err) {
+			return domain.Bookmark{}, domain.ErrBookmarkAlreadyExists
+		}
 		return domain.Bookmark{}, fmt.Errorf("create bookmark: %w", err)
 	}
 
