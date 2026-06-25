@@ -1,0 +1,112 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: production
+  cancel-in-progress: true
+
+env:
+  APP_HOST: app.164.92.184.65.sslip.io
+  API_HOST: api.164.92.184.65.sslip.io
+  API_URL: https://api.164.92.184.65.sslip.io/api/v1
+  API_IMAGE: ghcr.io/orphan433-code/boxmind-api
+  WEB_IMAGE: ghcr.io/orphan433-code/boxmind-web
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: |
+            ${{ env.API_IMAGE }}:${{ github.sha }}
+            ${{ env.API_IMAGE }}:latest
+
+      - name: Build and push web image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.web.prod
+          push: true
+          build-args: |
+            VITE_API_URL=${{ env.API_URL }}
+          tags: |
+            ${{ env.WEB_IMAGE }}:${{ github.sha }}
+            ${{ env.WEB_IMAGE }}:latest
+
+      - name: Prepare deploy files
+        run: |
+          mkdir -p deploy
+          cp docker-compose.prod.yml Caddyfile deploy/
+          cat > deploy/.env <<'EOF'
+          IMAGE_TAG=${{ github.sha }}
+          APP_HOST=${{ env.APP_HOST }}
+          API_HOST=${{ env.API_HOST }}
+          PORT=8080
+          ENV=production
+          ALLOWED_ORIGINS=https://${{ env.APP_HOST }}
+          DB_POSTGRE_HOST=postgres
+          DB_POSTGRE_PORT=5432
+          DB_POSTGRE_USER=${{ secrets.DB_POSTGRE_USER }}
+          DB_POSTGRE_PASSWORD=${{ secrets.DB_POSTGRE_PASSWORD }}
+          DB_POSTGRE_NAME=${{ secrets.DB_POSTGRE_NAME }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          JWT_TTL=24h
+          OTP_TTL=10m
+          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL=${{ secrets.GEMINI_MODEL }}
+          SMTP_HOST=${{ secrets.SMTP_HOST }}
+          SMTP_PORT=${{ secrets.SMTP_PORT }}
+          SMTP_USER=${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
+          SMTP_FROM=${{ secrets.SMTP_FROM }}
+          EOF
+          sed -i 's/^          //' deploy/.env
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Copy deploy files
+        run: |
+          ssh -i ~/.ssh/deploy_key "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" "mkdir -p /opt/boxmind"
+          scp -i ~/.ssh/deploy_key deploy/docker-compose.prod.yml deploy/Caddyfile deploy/.env "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/opt/boxmind/"
+
+      - name: Deploy on server
+        run: |
+          ssh -i ~/.ssh/deploy_key "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" <<'EOF'
+          set -e
+          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          cd /opt/boxmind
+          docker compose -f docker-compose.prod.yml pull
+          docker compose -f docker-compose.prod.yml up -d
+          docker image prune -f
+          EOF

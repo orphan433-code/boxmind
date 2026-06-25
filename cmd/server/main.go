@@ -81,8 +81,12 @@ func main() {
 			if strings.HasPrefix(origin, "chrome-extension://") {
 				return true
 			}
-			return origin == "http://localhost:5173" ||
-				origin == "http://127.0.0.1:5173"
+			for _, allowed := range cfg.AllowedOrigins {
+				if origin == allowed {
+					return true
+				}
+			}
+			return false
 		},
 		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
 		AllowMethods:     "GET, POST, PUT, PATCH, DELETE, OPTIONS",

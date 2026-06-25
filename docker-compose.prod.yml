@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_POSTGRE_USER}
+      POSTGRES_PASSWORD: ${DB_POSTGRE_PASSWORD}
+      POSTGRES_DB: ${DB_POSTGRE_NAME}
+    volumes:
+      - boxmind_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_POSTGRE_USER} -d ${DB_POSTGRE_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    image: ghcr.io/orphan433-code/boxmind-api:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      PORT: "8080"
+      ENV: production
+      DB_POSTGRE_HOST: postgres
+      DB_POSTGRE_PORT: "5432"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    image: ghcr.io/orphan433-code/boxmind-web:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      - api
+
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    environment:
+      APP_HOST: ${APP_HOST}
+      API_HOST: ${API_HOST}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+      - api
+
+volumes:
+  boxmind_pg_data:
+  caddy_data:
+  caddy_config:
