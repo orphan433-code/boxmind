@@ -56,7 +56,7 @@ func main() {
 
 	otpRepo := postgres.NewOTPRepository(db)
 	tokenProvider := jwt.NewProvider(cfg.JWTSecret, cfg.JWTTTL)
-	emailSender := service.NewEmailSender(cfg.SMTP)
+	emailSender := service.NewEmailSender(cfg.Mail)
 	authService := service.NewAuthService(
 		otpRepo,
 		userService,

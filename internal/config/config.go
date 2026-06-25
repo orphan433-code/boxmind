@@ -17,7 +17,21 @@ type Config struct {
 	OTPTTL         time.Duration
 	GeminiAPIKey   string
 	GeminiModel    string
-	SMTP           SMTPConfig
+	Mail           MailConfig
+}
+
+type MailConfig struct {
+	From   string
+	Resend ResendConfig
+	SMTP   SMTPConfig
+}
+
+type ResendConfig struct {
+	APIKey string
+}
+
+func (c ResendConfig) Enabled() bool {
+	return strings.TrimSpace(c.APIKey) != ""
 }
 
 type SMTPConfig struct {
@@ -77,12 +91,18 @@ func Load() Config {
 		OTPTTL:         otpTTL,
 		GeminiAPIKey:   os.Getenv("GEMINI_API_KEY"),
 		GeminiModel:    geminiModel(os.Getenv("GEMINI_MODEL")),
-		SMTP: SMTPConfig{
-			Host:     os.Getenv("SMTP_HOST"),
-			Port:     os.Getenv("SMTP_PORT"),
-			Username: os.Getenv("SMTP_USER"),
-			Password: os.Getenv("SMTP_PASSWORD"),
-			From:     os.Getenv("SMTP_FROM"),
+		Mail: MailConfig{
+			From: os.Getenv("MAIL_FROM"),
+			Resend: ResendConfig{
+				APIKey: os.Getenv("RESEND_API_KEY"),
+			},
+			SMTP: SMTPConfig{
+				Host:     os.Getenv("SMTP_HOST"),
+				Port:     os.Getenv("SMTP_PORT"),
+				Username: os.Getenv("SMTP_USER"),
+				Password: os.Getenv("SMTP_PASSWORD"),
+				From:     os.Getenv("SMTP_FROM"),
+			},
 		},
 	}
 }

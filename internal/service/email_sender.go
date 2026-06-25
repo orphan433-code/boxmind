@@ -8,22 +8,35 @@ import (
 	"pet-link/internal/pkg/mail"
 )
 
-func NewEmailSender(cfg config.SMTPConfig) EmailSender {
-	if !cfg.Enabled() {
-		log.Println("SMTP is not configured; login codes are printed to server logs")
-		return NewConsoleEmailSender()
-	}
-
+func NewEmailSender(cfg config.MailConfig) EmailSender {
 	from := strings.TrimSpace(cfg.From)
-	if from == "" {
-		from = cfg.Username
+
+	if cfg.Resend.Enabled() {
+		log.Println("email provider: resend (https)")
+		return mail.NewResendSender(mail.ResendConfig{
+			APIKey: cfg.Resend.APIKey,
+			From:   from,
+		})
 	}
 
-	return mail.NewSMTPSender(mail.SMTPConfig{
-		Host:     cfg.Host,
-		Port:     cfg.Port,
-		Username: cfg.Username,
-		Password: cfg.Password,
-		From:     from,
-	})
+	if cfg.SMTP.Enabled() {
+		log.Println("email provider: smtp")
+		smtpFrom := from
+		if smtpFrom == "" {
+			smtpFrom = cfg.SMTP.From
+		}
+		if smtpFrom == "" {
+			smtpFrom = cfg.SMTP.Username
+		}
+		return mail.NewSMTPSender(mail.SMTPConfig{
+			Host:     cfg.SMTP.Host,
+			Port:     cfg.SMTP.Port,
+			Username: cfg.SMTP.Username,
+			Password: cfg.SMTP.Password,
+			From:     smtpFrom,
+		})
+	}
+
+	log.Println("email provider: console (login codes printed to server logs)")
+	return NewConsoleEmailSender()
 }

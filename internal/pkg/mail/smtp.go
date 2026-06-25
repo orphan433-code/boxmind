@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/smtp"
 	"strings"
+	"time"
 )
 
 type SMTPConfig struct {
@@ -71,6 +72,9 @@ func (s *SMTPSender) send(ctx context.Context, to, subject, body string) error {
 
 	msg := buildMessage(s.cfg.From, to, subject, body)
 	addr := net.JoinHostPort(s.cfg.Host, s.cfg.Port)
+
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
 
 	var auth smtp.Auth
 	if s.cfg.Username != "" {
