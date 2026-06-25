@@ -10,21 +10,12 @@ func TestPlatformThumbnailURLYouTube(t *testing.T) {
 	}
 }
 
-func TestGenericURLHintsAnimeSite(t *testing.T) {
-	got, ok := GenericURLHints("https://animesss.com/aniserials/video/comedy/3263-ledjanaja-stena.html")
+func TestTitleHintFromURLAnimeSite(t *testing.T) {
+	got, ok := TitleHintFromURL("https://animesss.com/aniserials/video/comedy/3263-ledjanaja-stena.html")
 	if !ok {
-		t.Fatal("expected hints")
+		t.Fatal("expected title hint")
 	}
-	if got.Title != "Ledjanaja stena" && got.Title != "Ледяная стена" {
-		// slug translit title - at least non-empty
-		if got.Title == "" {
-			t.Fatalf("empty title")
-		}
-	}
-	if got.Category != "movies" {
-		t.Fatalf("category = %q", got.Category)
-	}
-	if len(got.Tags) != 2 {
-		t.Fatalf("tags = %v", got.Tags)
+	if got == "" {
+		t.Fatal("empty title")
 	}
 }

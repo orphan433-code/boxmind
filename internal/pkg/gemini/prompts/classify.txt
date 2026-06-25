@@ -19,6 +19,10 @@ Rules:
 - For anime streaming pages -> movies, tags like ["аниме", genre]
 - For film/series watch pages -> movies
 - For YouTube videos -> entertainment or learning or movies depending on content type
-- title: Russian if available, otherwise original. Never mix languages.
+- title: write it in Russian. Rules:
+  - If the title is a transliteration of Russian (Latin letters spelling Russian words, e.g. "Vse Chto Ty Lyubish"), rewrite it in proper Russian ("Всё, что ты любишь").
+  - If you recognize the work/film/show, use its official or commonly used Russian title.
+  - Keep proper names, brands, song titles and product names in their original form when there is no established Russian version.
+  - Never mix two languages in one title.
 
-Do not use joke/fallback text. If unsure about genre, still pick the best category and tags from the title.
+Do not use joke/fallback text. If unsure about genre, still pick the best category and tags from the title and URL path.

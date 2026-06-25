@@ -24,7 +24,8 @@ var junkSlugs = map[string]struct{}{
 	"watch":      {},
 }
 
-// FallbackEnrichment tries HTTP metadata, then URL-based hints.
+// FallbackEnrichment tries HTTP metadata, then a URL title hint.
+// Category and tags are intentionally omitted — they are assigned later by AI classification.
 func FallbackEnrichment(ctx context.Context, extractor Extractor, rawURL string) (domain.BookmarkEnrichment, bool) {
 	if extractor != nil {
 		page, err := extractor.Extract(ctx, rawURL)
@@ -33,25 +34,28 @@ func FallbackEnrichment(ctx context.Context, extractor Extractor, rawURL string)
 				Title:       CleanPageTitle(page.Title),
 				Description: page.Description,
 			}
-			if hints, ok := enrichmentFromKnownURL(rawURL); ok {
-				if enrichment.Title == "" {
-					enrichment.Title = hints.Title
+			if enrichment.Title == "" {
+				if title, ok := titleHintFromURL(rawURL); ok {
+					enrichment.Title = title
 				}
-				enrichment.Category = hints.Category
-				enrichment.Tags = hints.Tags
-			}
-			if enrichment.Category == "" {
-				enrichment.Category = "other"
 			}
 			return enrichment, true
 		}
 	}
 
-	return enrichmentFromKnownURL(rawURL)
+	return titleHintEnrichment(rawURL)
 }
 
-func enrichmentFromKnownURL(rawURL string) (domain.BookmarkEnrichment, bool) {
-	return GenericURLHints(rawURL)
+func titleHintFromURL(rawURL string) (string, bool) {
+	return TitleHintFromURL(rawURL)
+}
+
+func titleHintEnrichment(rawURL string) (domain.BookmarkEnrichment, bool) {
+	title, ok := TitleHintFromURL(rawURL)
+	if !ok {
+		return domain.BookmarkEnrichment{}, false
+	}
+	return domain.BookmarkEnrichment{Title: title}, true
 }
 
 func splitPathSegments(path string) []string {

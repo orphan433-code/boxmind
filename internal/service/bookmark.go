@@ -108,7 +108,7 @@ func (s *bookmarkService) Create(ctx context.Context, userID string, input domai
 		return domain.Bookmark{}, domain.ErrBookmarkAlreadyExists
 	}
 
-	s.applyQuickFallback(ctx, &input)
+	s.applyQuickContentFallback(ctx, &input)
 
 	if input.ImageURL == "" {
 		if thumb := pagemeta.PlatformThumbnailURL(input.URL); thumb != "" {
@@ -174,7 +174,7 @@ func (s *bookmarkService) fetchImageAsync(userID, bookmarkID, rawURL string) {
 	}()
 }
 
-func (s *bookmarkService) applyQuickFallback(ctx context.Context, input *domain.CreateBookmarkInput) {
+func (s *bookmarkService) applyQuickContentFallback(ctx context.Context, input *domain.CreateBookmarkInput) {
 	if s.metaFallback == nil {
 		return
 	}
@@ -187,7 +187,7 @@ func (s *bookmarkService) applyQuickFallback(ctx context.Context, input *domain.
 		return
 	}
 
-	s.applyEnrichment(input, gemini.NormalizeEnrichment(fallback))
+	s.applyContentEnrichment(input, gemini.NormalizeEnrichment(fallback))
 }
 
 func (s *bookmarkService) enrichAsync(userID, bookmarkID, rawURL string) {
@@ -259,10 +259,7 @@ func (s *bookmarkService) loadEnrichmentHints(ctx context.Context, userID, bookm
 }
 
 func (s *bookmarkService) finishEnrichment(ctx context.Context, rawURL string, hints, enrichment domain.BookmarkEnrichment) domain.BookmarkEnrichment {
-	merged := cardquality.Merge(hints, gemini.NormalizeEnrichment(enrichment))
-	if !needsClassification(merged) {
-		return merged
-	}
+	merged := cardquality.Merge(hints, contentOnlyEnrichment(gemini.NormalizeEnrichment(enrichment)))
 	return s.classifyAndMerge(ctx, rawURL, merged)
 }
 
@@ -274,13 +271,11 @@ func (s *bookmarkService) finalizeEnrichment(ctx context.Context, userID, bookma
 
 	if s.metaFallback != nil {
 		if fallback, ok := s.metaFallback.FallbackEnrich(metaCtx, rawURL); ok {
-			merged = cardquality.Merge(merged, gemini.NormalizeEnrichment(fallback))
+			merged = cardquality.Merge(merged, contentOnlyEnrichment(gemini.NormalizeEnrichment(fallback)))
 		}
 	}
 
-	if merged.Title != "" || merged.Description != "" {
-		merged = s.classifyAndMerge(ctx, rawURL, merged)
-	}
+	merged = s.classifyAndMerge(ctx, rawURL, merged)
 
 	imageURL := s.bookmarkImageURL(ctx, userID, bookmarkID)
 	s.tryPersistEnrichment(ctx, userID, bookmarkID, merged)
@@ -299,7 +294,7 @@ func (s *bookmarkService) bookmarkImageURL(ctx context.Context, userID, bookmark
 }
 
 func (s *bookmarkService) classifyAndMerge(ctx context.Context, rawURL string, base domain.BookmarkEnrichment) domain.BookmarkEnrichment {
-	if s.enricher == nil || !needsClassification(base) {
+	if s.enricher == nil || !hasContentForClassification(base) {
 		return base
 	}
 
@@ -332,14 +327,15 @@ func mergeEnrichment(base, patch domain.BookmarkEnrichment) domain.BookmarkEnric
 	return cardquality.Merge(base, patch)
 }
 
-func needsClassification(enrichment domain.BookmarkEnrichment) bool {
-	if enrichment.Title == "" && enrichment.Description == "" {
-		return false
+func hasContentForClassification(enrichment domain.BookmarkEnrichment) bool {
+	return strings.TrimSpace(enrichment.Title) != "" || strings.TrimSpace(enrichment.Description) != ""
+}
+
+func contentOnlyEnrichment(enrichment domain.BookmarkEnrichment) domain.BookmarkEnrichment {
+	return domain.BookmarkEnrichment{
+		Title:       enrichment.Title,
+		Description: enrichment.Description,
 	}
-	if len(enrichment.Tags) >= 2 && enrichment.Category != "" && enrichment.Category != "other" {
-		return false
-	}
-	return true
 }
 
 func (s *bookmarkService) tryPersistEnrichment(ctx context.Context, userID, bookmarkID string, enrichment domain.BookmarkEnrichment) bool {
@@ -369,18 +365,13 @@ func (s *bookmarkService) persistEnrichment(ctx context.Context, userID, bookmar
 	return s.repo.UpdateEnrichment(ctx, userID, bookmarkID, enrichment)
 }
 
-func (s *bookmarkService) applyEnrichment(input *domain.CreateBookmarkInput, enrichment domain.BookmarkEnrichment) {
+func (s *bookmarkService) applyContentEnrichment(input *domain.CreateBookmarkInput, enrichment domain.BookmarkEnrichment) {
+	content := contentOnlyEnrichment(enrichment)
 	if input.Title == "" {
-		input.Title = enrichment.Title
+		input.Title = content.Title
 	}
 	if input.Description == "" {
-		input.Description = enrichment.Description
-	}
-	if input.Category == "" {
-		input.Category = enrichment.Category
-	}
-	if len(input.Tags) == 0 && len(enrichment.Tags) > 0 {
-		input.Tags = enrichment.Tags
+		input.Description = content.Description
 	}
 }
 
