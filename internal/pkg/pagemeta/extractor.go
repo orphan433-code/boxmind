@@ -56,6 +56,10 @@ func (e *HTTPExtractor) Extract(ctx context.Context, rawURL string) (Page, error
 		return Page{}, err
 	}
 
+	if page, ok := youtubeOEmbed(ctx, e.client, parsedURL.String()); ok {
+		return page, nil
+	}
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, parsedURL.String(), nil)
 	if err != nil {
 		return Page{}, fmt.Errorf("create request: %w", err)

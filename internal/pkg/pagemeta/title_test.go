@@ -19,6 +19,18 @@ func TestCleanPageTitle(t *testing.T) {
 			in:   "Normal title",
 			want: "Normal title",
 		},
+		{
+			in:   "- YouTube",
+			want: "",
+		},
+		{
+			in:   "Японский рэп микс - YouTube",
+			want: "Японский рэп микс",
+		},
+		{
+			in:   "YouTube",
+			want: "",
+		},
 	}
 
 	for _, tt := range tests {
