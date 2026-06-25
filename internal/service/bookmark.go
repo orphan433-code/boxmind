@@ -43,16 +43,17 @@ type BookmarkService interface {
 }
 
 const (
-	imageFetchTimeout    = 16 * time.Second
-	imageFetchAttempts   = 3
-	imageFetchRetryDelay = 2 * time.Second
-	quickMetaTimeout     = 2 * time.Second
-	metaFallbackTimeout  = 12 * time.Second
-	enrichAttemptTimeout = 20 * time.Second
-	enrichTotalTimeout   = 4 * time.Minute
-	enrichMaxAttempts    = 8
-	enrichRetryBaseDelay = 2 * time.Second
-	enrichRetryMaxDelay  = 30 * time.Second
+	imageFetchTimeout     = 16 * time.Second
+	imageFetchAttempts    = 3
+	imageFetchRetryDelay  = 2 * time.Second
+	quickMetaTimeout      = 2 * time.Second
+	metaFallbackTimeout   = 12 * time.Second
+	enrichAttemptTimeout  = 20 * time.Second
+	enrichLoopTimeout     = 110 * time.Second
+	enrichFinalizeTimeout = 45 * time.Second
+	enrichMaxAttempts     = 4
+	enrichRetryBaseDelay  = 2 * time.Second
+	enrichRetryMaxDelay   = 15 * time.Second
 )
 
 type BookmarkMetaFallback interface {
@@ -196,14 +197,6 @@ func (s *bookmarkService) enrichAsync(userID, bookmarkID, rawURL string) {
 	}
 
 	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), enrichTotalTimeout)
-		defer cancel()
-
-		hints, ok := s.loadEnrichmentHints(ctx, userID, bookmarkID)
-		if !ok {
-			return
-		}
-
 		defer func() {
 			markCtx, markCancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer markCancel()
@@ -212,42 +205,68 @@ func (s *bookmarkService) enrichAsync(userID, bookmarkID, rawURL string) {
 			}
 		}()
 
-		for attempt := 1; attempt <= enrichMaxAttempts; attempt++ {
-			if s.enricher != nil {
-				attemptCtx, attemptCancel := context.WithTimeout(ctx, enrichAttemptTimeout)
-				enrichment, err := s.enricher.Enrich(attemptCtx, rawURL)
-				attemptCancel()
-
-				if err == nil && !gemini.IsUnavailableEnrichment(enrichment) {
-					finished := s.finishEnrichment(ctx, rawURL, hints, enrichment)
-					imageURL := s.bookmarkImageURL(ctx, userID, bookmarkID)
-					s.tryPersistEnrichment(ctx, userID, bookmarkID, finished)
-					if cardquality.IsGoodEnough(finished, imageURL) {
-						return
-					}
-					hints = finished
-				}
-
-				if err != nil {
-					log.Printf("bookmark enrich attempt %d failed for %s: %v", attempt, rawURL, err)
-				}
-			}
-
-			if attempt == enrichMaxAttempts {
-				break
-			}
-
-			delay := enrichRetryDelay(attempt)
-			select {
-			case <-ctx.Done():
-				log.Printf("bookmark enrich timed out for %s", rawURL)
-				return
-			case <-time.After(delay):
-			}
+		loadCtx, loadCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		hints, ok := s.loadEnrichmentHints(loadCtx, userID, bookmarkID)
+		loadCancel()
+		if !ok {
+			return
 		}
 
-		s.finalizeEnrichment(ctx, userID, bookmarkID, rawURL, hints)
+		// Stage 1: page-reading Enrich with retries, on its own time budget.
+		hints, done := s.runEnrichLoop(userID, bookmarkID, rawURL, hints)
+		if done {
+			return
+		}
+
+		// Stage 2: always run the fallback + Classify with a FRESH budget, so
+		// blocked or slow sites (e.g. HDRezka) still get a normalized title,
+		// category and tags even when every Enrich attempt timed out.
+		finalizeCtx, cancel := context.WithTimeout(context.Background(), enrichFinalizeTimeout)
+		defer cancel()
+		s.finalizeEnrichment(finalizeCtx, userID, bookmarkID, rawURL, hints)
 	}()
+}
+
+// runEnrichLoop runs the page-reading Enrich step with retries. It returns the
+// best hints found and whether the card is already good enough (so no fallback
+// is needed). It uses its own time budget, separate from the Classify fallback.
+func (s *bookmarkService) runEnrichLoop(userID, bookmarkID, rawURL string, hints domain.BookmarkEnrichment) (domain.BookmarkEnrichment, bool) {
+	if s.enricher == nil {
+		return hints, false
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), enrichLoopTimeout)
+	defer cancel()
+
+	for attempt := 1; attempt <= enrichMaxAttempts; attempt++ {
+		attemptCtx, attemptCancel := context.WithTimeout(ctx, enrichAttemptTimeout)
+		enrichment, err := s.enricher.Enrich(attemptCtx, rawURL)
+		attemptCancel()
+
+		if err == nil && !gemini.IsUnavailableEnrichment(enrichment) {
+			finished := s.finishEnrichment(ctx, rawURL, hints, enrichment)
+			imageURL := s.bookmarkImageURL(ctx, userID, bookmarkID)
+			s.tryPersistEnrichment(ctx, userID, bookmarkID, finished)
+			if cardquality.IsGoodEnough(finished, imageURL) {
+				return finished, true
+			}
+			hints = finished
+		} else if err != nil {
+			log.Printf("bookmark enrich attempt %d failed for %s: %v", attempt, rawURL, err)
+		}
+
+		if attempt == enrichMaxAttempts {
+			break
+		}
+
+		select {
+		case <-ctx.Done():
+			return hints, false
+		case <-time.After(enrichRetryDelay(attempt)):
+		}
+	}
+
+	return hints, false
 }
 
 func (s *bookmarkService) loadEnrichmentHints(ctx context.Context, userID, bookmarkID string) (domain.BookmarkEnrichment, bool) {
