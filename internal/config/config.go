@@ -129,7 +129,7 @@ func allowedOrigins(raw string) []string {
 
 func geminiModel(model string) string {
 	if model == "" {
-		return "gemini-2.5-flash"
+		return "gemini-2.0-flash"
 	}
 	return model
 }

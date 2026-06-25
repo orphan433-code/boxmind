@@ -18,6 +18,7 @@ type BookmarkRepository interface {
 	ListByUserID(ctx context.Context, userID string) ([]domain.Bookmark, error)
 	GetByIDForUser(ctx context.Context, userID, bookmarkID string) (domain.Bookmark, error)
 	UpdateImageURL(ctx context.Context, userID, bookmarkID, imageURL string) error
+	UpdateEnrichment(ctx context.Context, userID, bookmarkID string, enrichment domain.BookmarkEnrichment) error
 	Delete(ctx context.Context, userID, bookmarkID string) error
 }
 
@@ -36,7 +37,15 @@ type BookmarkService interface {
 	Delete(ctx context.Context, userID, bookmarkID string) error
 }
 
-const imageFetchTimeout = 4 * time.Second
+const (
+	imageFetchTimeout    = 4 * time.Second
+	quickMetaTimeout     = 2 * time.Second
+	enrichAttemptTimeout = 20 * time.Second
+	enrichTotalTimeout   = 4 * time.Minute
+	enrichMaxAttempts    = 8
+	enrichRetryBaseDelay = 2 * time.Second
+	enrichRetryMaxDelay  = 30 * time.Second
+)
 
 type BookmarkMetaFallback interface {
 	FallbackEnrich(ctx context.Context, rawURL string) (domain.BookmarkEnrichment, bool)
@@ -91,7 +100,7 @@ func (s *bookmarkService) Create(ctx context.Context, userID string, input domai
 		return domain.Bookmark{}, domain.ErrBookmarkAlreadyExists
 	}
 
-	s.enrichFromAI(ctx, &input)
+	s.applyQuickFallback(ctx, &input)
 
 	if input.Title == "" {
 		input.Title = input.URL
@@ -111,6 +120,8 @@ func (s *bookmarkService) Create(ctx context.Context, userID string, input domai
 	if bookmark.ImageURL == "" {
 		s.fetchImageAsync(bookmark.UserID, bookmark.ID, bookmark.URL)
 	}
+
+	s.enrichAsync(bookmark.UserID, bookmark.ID, bookmark.URL)
 
 	return bookmark, nil
 }
@@ -139,39 +150,92 @@ func (s *bookmarkService) fetchImageAsync(userID, bookmarkID, rawURL string) {
 	}()
 }
 
-func (s *bookmarkService) enrichFromAI(ctx context.Context, input *domain.CreateBookmarkInput) {
-	if s.enricher == nil {
-		return
-	}
-
-	enrichment, err := s.enricher.Enrich(ctx, input.URL)
-	if err != nil {
-		log.Printf("bookmark enrich failed for %s: %v", input.URL, err)
-		s.applyMetaFallback(ctx, input)
-		return
-	}
-
-	if gemini.IsUnavailableEnrichment(enrichment) {
-		if s.applyMetaFallback(ctx, input) {
-			return
-		}
-	}
-
-	s.applyEnrichment(input, enrichment)
-}
-
-func (s *bookmarkService) applyMetaFallback(ctx context.Context, input *domain.CreateBookmarkInput) bool {
+func (s *bookmarkService) applyQuickFallback(ctx context.Context, input *domain.CreateBookmarkInput) {
 	if s.metaFallback == nil {
-		return false
+		return
 	}
 
-	fallback, ok := s.metaFallback.FallbackEnrich(ctx, input.URL)
+	quickCtx, cancel := context.WithTimeout(ctx, quickMetaTimeout)
+	defer cancel()
+
+	fallback, ok := s.metaFallback.FallbackEnrich(quickCtx, input.URL)
 	if !ok {
-		return false
+		return
 	}
 
 	s.applyEnrichment(input, gemini.NormalizeEnrichment(fallback))
-	return true
+}
+
+func (s *bookmarkService) enrichAsync(userID, bookmarkID, rawURL string) {
+	if s.enricher == nil && s.metaFallback == nil {
+		return
+	}
+
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), enrichTotalTimeout)
+		defer cancel()
+
+		for attempt := 1; attempt <= enrichMaxAttempts; attempt++ {
+			if s.enricher != nil {
+				attemptCtx, attemptCancel := context.WithTimeout(ctx, enrichAttemptTimeout)
+				enrichment, err := s.enricher.Enrich(attemptCtx, rawURL)
+				attemptCancel()
+
+				if err == nil && !gemini.IsUnavailableEnrichment(enrichment) {
+					if err := s.persistEnrichment(ctx, userID, bookmarkID, enrichment); err != nil {
+						log.Printf("bookmark enrich update failed for %s: %v", rawURL, err)
+					}
+					return
+				}
+
+				if err != nil {
+					log.Printf("bookmark enrich attempt %d failed for %s: %v", attempt, rawURL, err)
+				}
+			}
+
+			if attempt == enrichMaxAttempts {
+				break
+			}
+
+			delay := enrichRetryDelay(attempt)
+			select {
+			case <-ctx.Done():
+				log.Printf("bookmark enrich timed out for %s", rawURL)
+				return
+			case <-time.After(delay):
+			}
+		}
+
+		fallbackCtx, fallbackCancel := context.WithTimeout(context.Background(), quickMetaTimeout)
+		defer fallbackCancel()
+
+		if s.metaFallback != nil {
+			if fallback, ok := s.metaFallback.FallbackEnrich(fallbackCtx, rawURL); ok {
+				if err := s.persistEnrichment(ctx, userID, bookmarkID, gemini.NormalizeEnrichment(fallback)); err != nil {
+					log.Printf("bookmark enrich fallback update failed for %s: %v", rawURL, err)
+				}
+				return
+			}
+		}
+
+		log.Printf("bookmark enrich exhausted for %s", rawURL)
+	}()
+}
+
+func enrichRetryDelay(attempt int) time.Duration {
+	delay := enrichRetryBaseDelay * time.Duration(1<<(attempt-1))
+	if delay > enrichRetryMaxDelay {
+		return enrichRetryMaxDelay
+	}
+	return delay
+}
+
+func (s *bookmarkService) persistEnrichment(ctx context.Context, userID, bookmarkID string, enrichment domain.BookmarkEnrichment) error {
+	enrichment = gemini.NormalizeEnrichment(enrichment)
+	if enrichment.Title == "" && enrichment.Description == "" && enrichment.Category == "" && len(enrichment.Tags) == 0 {
+		return nil
+	}
+	return s.repo.UpdateEnrichment(ctx, userID, bookmarkID, enrichment)
 }
 
 func (s *bookmarkService) applyEnrichment(input *domain.CreateBookmarkInput, enrichment domain.BookmarkEnrichment) {

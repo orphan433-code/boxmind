@@ -59,6 +59,29 @@ func (r *BookmarkRepository) UpdateImageURL(ctx context.Context, userID, bookmar
 	return nil
 }
 
+func (r *BookmarkRepository) UpdateEnrichment(ctx context.Context, userID, bookmarkID string, enrichment domain.BookmarkEnrichment) error {
+	const query = `
+		UPDATE bookmarks
+		SET
+			title = CASE WHEN $1 <> '' THEN $1 ELSE title END,
+			description = CASE WHEN $2 <> '' THEN $2 ELSE description END,
+			category = CASE WHEN $3 <> '' THEN $3 ELSE category END,
+			tags = CASE WHEN cardinality($4::text[]) > 0 THEN $4 ELSE tags END,
+			updated_at = now()
+		WHERE id = $5 AND user_id = $6
+	`
+
+	tag, err := r.db.Pool.Exec(ctx, query, enrichment.Title, enrichment.Description, enrichment.Category, enrichment.Tags, bookmarkID, userID)
+	if err != nil {
+		return fmt.Errorf("update bookmark enrichment: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return domain.ErrBookmarkNotFound
+	}
+
+	return nil
+}
+
 func (r *BookmarkRepository) ListByUserID(ctx context.Context, userID string) ([]domain.Bookmark, error) {
 	const query = `
 		SELECT id, user_id, url, title, description, image_url, category, tags, created_at, updated_at

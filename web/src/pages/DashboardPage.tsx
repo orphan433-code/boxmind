@@ -56,6 +56,31 @@ export function DashboardPage() {
     void loadBookmarks();
   }, [loadBookmarks]);
 
+  const needsEnrichmentRefresh = useMemo(
+    () =>
+      bookmarks.some((bookmark) => {
+        const createdAt = new Date(bookmark.created_at).getTime();
+        const isFresh = Date.now() - createdAt < 3 * 60 * 1000;
+        const looksPending =
+          bookmark.category === "other" &&
+          (!bookmark.description || bookmark.title === bookmark.url);
+        return isFresh && looksPending;
+      }),
+    [bookmarks],
+  );
+
+  useEffect(() => {
+    if (!token || !needsEnrichmentRefresh) return;
+
+    const intervalId = window.setInterval(() => {
+      void listBookmarks(token)
+        .then((data) => setBookmarks(data))
+        .catch(() => {});
+    }, 5000);
+
+    return () => window.clearInterval(intervalId);
+  }, [token, needsEnrichmentRefresh]);
+
   const sections = useMemo(() => listActiveSections(bookmarks), [bookmarks]);
   const sectionCounts = useMemo(() => countBySection(bookmarks), [bookmarks]);
 

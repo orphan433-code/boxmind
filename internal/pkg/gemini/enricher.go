@@ -22,7 +22,7 @@ func NewEnricher(ctx context.Context, apiKey, model string) (*Enricher, error) {
 		return nil, fmt.Errorf("gemini api key is required")
 	}
 	if model == "" {
-		model = "gemini-2.5-flash"
+		model = "gemini-2.0-flash"
 	}
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{

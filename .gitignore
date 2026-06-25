@@ -15,3 +15,4 @@ web/dist/
 web/.env
 extension.pem
 *.pem
+.env.example
