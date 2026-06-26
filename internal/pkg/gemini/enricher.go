@@ -165,13 +165,55 @@ func extractJSON(raw string) string {
 		raw = strings.TrimSpace(raw)
 	}
 
-	start := strings.Index(raw, "{")
-	end := strings.LastIndex(raw, "}")
-	if start >= 0 && end > start {
-		return raw[start : end+1]
+	if obj := firstJSONObject(raw); obj != "" {
+		return obj
 	}
 
 	return raw
+}
+
+// firstJSONObject returns the first balanced { ... } object in raw, ignoring any
+// trailing content (extra prose, backticks, second code fences) that some models
+// append after the JSON payload. Braces inside string literals are skipped.
+func firstJSONObject(raw string) string {
+	start := strings.IndexByte(raw, '{')
+	if start < 0 {
+		return ""
+	}
+
+	depth := 0
+	inString := false
+	escaped := false
+
+	for i := start; i < len(raw); i++ {
+		c := raw[i]
+
+		if inString {
+			switch {
+			case escaped:
+				escaped = false
+			case c == '\\':
+				escaped = true
+			case c == '"':
+				inString = false
+			}
+			continue
+		}
+
+		switch c {
+		case '"':
+			inString = true
+		case '{':
+			depth++
+		case '}':
+			depth--
+			if depth == 0 {
+				return raw[start : i+1]
+			}
+		}
+	}
+
+	return ""
 }
 
 func isRetryable(err error) bool {
