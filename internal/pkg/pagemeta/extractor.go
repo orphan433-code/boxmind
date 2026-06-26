@@ -60,10 +60,6 @@ func (e *HTTPExtractor) Extract(ctx context.Context, rawURL string) (Page, error
 		return page, nil
 	}
 
-	if page, ok := tiktokOEmbed(ctx, e.client, parsedURL.String()); ok {
-		return page, nil
-	}
-
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, parsedURL.String(), nil)
 	if err != nil {
 		return Page{}, fmt.Errorf("create request: %w", err)

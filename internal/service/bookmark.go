@@ -46,7 +46,7 @@ const (
 	imageFetchTimeout     = 16 * time.Second
 	imageFetchAttempts    = 3
 	imageFetchRetryDelay  = 2 * time.Second
-	quickMetaTimeout      = 5 * time.Second
+	quickMetaTimeout      = 2 * time.Second
 	metaFallbackTimeout   = 12 * time.Second
 	enrichAttemptTimeout  = 20 * time.Second
 	enrichLoopTimeout     = 110 * time.Second

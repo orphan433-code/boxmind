@@ -91,17 +91,6 @@ youtube.com / youtu.be — decide by TITLE and content type, NOT by domain alone
   e.g. "Мясник vs киберспортсмен CS2" -> gaming, tags: ["геймплей", "cs2"]
   e.g. political YouTube video -> entertainment, tags: ["видео", "политика"]
 
-tiktok.com / instagram.com (Reels) / YouTube Shorts — short-form video.
-  Decide by the CAPTION/title meaning, NOT by "it is a short clip":
-  recipe / cooking / рецепт / "как приготовить" -> learning, tags: ["рецепт", dish/topic] — e.g. ["рецепт", "борщ"]
-  lifehack / how-to / совет / инструкция / "как сделать" -> learning, tags: ["лайфхак"|"гайд", topic]
-  workout / фитнес / тренировка -> learning, tags: ["тренировка", topic]
-  product review / распаковка / "обзор товара" -> shopping, tags: ["обзор", topic]
-  vlog / story / история / юмор / прикол / entertainment -> entertainment, tags: ["видео", topic]
-  NEVER: pick "other" for a TikTok/Reel when the caption clearly states the topic.
-  e.g. "Технология приготовления борща из ресторанов" -> learning, tags: ["рецепт", "борщ"]
-  e.g. "История о покупке б/у ноутбука за 40000" -> entertainment, tags: ["видео", "покупки"]
-
 Step 1 — What does the USER DO on this page? Category = action/format, NOT topic.
   WATCH video (film, series, anime, vlog, documentary, interview, clip) -> movies or entertainment
   STUDY / learn (course, lesson, tutorial, lecture, how-to, sheet music to practice) -> learning
