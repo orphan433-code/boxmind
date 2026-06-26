@@ -1,6 +1,10 @@
 package service
 
-import "testing"
+import (
+	"testing"
+
+	"pet-link/internal/domain"
+)
 
 func TestTitleSourceForClassification(t *testing.T) {
 	tests := []struct {
@@ -13,6 +17,12 @@ func TestTitleSourceForClassification(t *testing.T) {
 			name:  "slug title",
 			url:   "http://hdrezka.co/films/fantasy/123-garri-potter-i-uznik-azkabana-2004.html",
 			title: "Garri Potter и Uznik Azkabana",
+			want:  "url_slug",
+		},
+		{
+			name:  "slug title action movie",
+			url:   "http://hdrezka.co/films/action/90232-klinki-hraniteley-burya-v-pustyne-2026.html",
+			title: "Klinki Hraniteley Burya V Pustyne",
 			want:  "url_slug",
 		},
 		{
@@ -35,5 +45,22 @@ func TestTitleSourceForClassification(t *testing.T) {
 				t.Fatalf("got %q, want %q", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestClassificationCompleteForURLRequiresSlugTitleNormalization(t *testing.T) {
+	enrichment := domain.BookmarkEnrichment{
+		Title:    "Klinki Hraniteley Burya V Pustyne",
+		Category: "movies",
+		Tags:     []string{"фильм", "боевик"},
+	}
+
+	if classificationCompleteForURL("http://hdrezka.co/films/action/90232-klinki-hraniteley-burya-v-pustyne-2026.html", enrichment) {
+		t.Fatal("expected slug title to require classify normalization")
+	}
+
+	enrichment.Title = "Blade of the Guardians"
+	if !classificationCompleteForURL("https://www.youtube.com/watch?v=abc123", enrichment) {
+		t.Fatal("expected trusted metadata title with category/tags to be complete")
 	}
 }

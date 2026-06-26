@@ -281,7 +281,7 @@ func (s *bookmarkService) finishEnrichment(ctx context.Context, rawURL string, h
 	// Keep the rich classification from the main Enrich step (it reads the page
 	// with the detailed prompt). Only fall back to Classify when it's still missing.
 	merged := cardquality.Merge(hints, gemini.NormalizeEnrichment(enrichment))
-	if classificationComplete(merged) {
+	if classificationCompleteForURL(rawURL, merged) {
 		return merged
 	}
 	return s.classifyAndMerge(ctx, rawURL, merged)
@@ -359,6 +359,18 @@ func hasContentForClassification(enrichment domain.BookmarkEnrichment) bool {
 // category and tags, so the lighter Classify pass can be skipped.
 func classificationComplete(enrichment domain.BookmarkEnrichment) bool {
 	return enrichment.Category != "" && enrichment.Category != "other" && len(enrichment.Tags) >= 2
+}
+
+func classificationCompleteForURL(rawURL string, enrichment domain.BookmarkEnrichment) bool {
+	if !classificationComplete(enrichment) {
+		return false
+	}
+
+	// URL-derived titles can already have good category/tags but still need one
+	// final Classify pass to normalize transliteration (e.g. "Garri Potter" or
+	// "Klinki Hraniteley") without translating trusted metadata titles.
+	source := titleSourceForClassification(rawURL, enrichment.Title)
+	return source != "url_slug" && source != "url"
 }
 
 func titleSourceForClassification(rawURL, title string) string {
