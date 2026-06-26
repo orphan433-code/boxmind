@@ -6,6 +6,7 @@ struct HomeView: View {
 
     @State private var showAddSheet = false
     @State private var searchText = ""
+    @State private var activeTag: String?
 
     var body: some View {
         NavigationStack {
@@ -16,15 +17,26 @@ struct HomeView: View {
                     ContentUnavailableView(
                         "Пока пусто",
                         systemImage: "tray",
-                        description: Text("Добавь первую ссылку — AI разложит её по полочкам.")
+                        description: Text("Добавь первую ссылку.")
                     )
                 } else if filteredBookmarks.isEmpty {
-                    ContentUnavailableView.search(text: searchText)
+                    ContentUnavailableView(
+                        activeTag == nil ? "Ничего не найдено" : "Нет закладок с этим тегом",
+                        systemImage: "magnifyingglass",
+                        description: Text(
+                            activeTag == nil
+                                ? "Попробуй другой запрос."
+                                : "Сбрось фильтр или выбери другой тег."
+                        )
+                    )
                 } else {
                     BookmarkListView(
                         bookmarks: filteredBookmarks,
                         session: session,
-                        viewModel: viewModel
+                        viewModel: viewModel,
+                        activeTag: activeTag,
+                        onTagTap: toggleTagFilter,
+                        onClearTag: { activeTag = nil }
                     )
                     .refreshable {
                         await viewModel.load(session: session)
@@ -59,19 +71,18 @@ struct HomeView: View {
     }
 
     private var filteredBookmarks: [Bookmark] {
-        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard !query.isEmpty else { return viewModel.bookmarks }
+        BookmarkFiltering.filter(
+            viewModel.bookmarks,
+            searchText: searchText,
+            activeTag: activeTag
+        )
+    }
 
-        return viewModel.bookmarks.filter { bookmark in
-            let searchableText = [
-                bookmark.title,
-                bookmark.description,
-                bookmark.url,
-                CategoryLabels.label(for: bookmark.category),
-                bookmark.tags.joined(separator: " ")
-            ].joined(separator: " ").lowercased()
-
-            return searchableText.contains(query)
+    private func toggleTagFilter(_ tag: String) {
+        if activeTag?.caseInsensitiveCompare(tag) == .orderedSame {
+            activeTag = nil
+        } else {
+            activeTag = tag
         }
     }
 }

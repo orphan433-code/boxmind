@@ -168,6 +168,14 @@ a {
   border-bottom: 1px solid var(--border);
 }
 
+.login-logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
 .login-brand h1 {
   margin: 0;
   font-size: var(--text-2xl);
@@ -191,8 +199,9 @@ a {
 
 .login-tagline {
   margin: 8px 0 0;
-  max-width: 26ch;
+  max-width: 22ch;
   font-size: var(--text-sm);
+  line-height: 1.45;
 }
 
 .login-form {

@@ -17,7 +17,7 @@ struct CategoriesView: View {
                     ContentUnavailableView(
                         "Категорий пока нет",
                         systemImage: "square.grid.2x2",
-                        description: Text("Сохрани первую ссылку — AI сам разложит её по категориям.")
+                        description: Text("Сохрани первую ссылку.")
                     )
                 } else {
                     ScrollView {

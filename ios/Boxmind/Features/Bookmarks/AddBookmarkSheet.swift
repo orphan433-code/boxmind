@@ -19,7 +19,7 @@ struct AddBookmarkSheet: View {
                 } header: {
                     Text("Ссылка")
                 } footer: {
-                    Text("Вставь URL — AI обработает карточку в фоне.")
+                    Text("Карточка дорастёт в фоне.")
                 }
 
                 if let errorMessage {

@@ -24,7 +24,7 @@ struct AccountView: View {
                 Section {
                     LabeledContent("Версия", value: appVersion)
                 } footer: {
-                    Text("Boxmind сохраняет ссылки и помогает AI разложить их по категориям.")
+                    Text(Brand.tagline)
                 }
             }
             .navigationTitle("Аккаунт")

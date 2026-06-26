@@ -49,9 +49,8 @@ export function BookmarkCard({
         <div className="bookmark-card-top">
           <div className="bookmark-card-badges">
             {enriching ? (
-              <span className="ai-badge" title="AI обрабатывает ссылку">
+              <span className="ai-badge" title="Дорабатываем карточку" aria-label="Дорабатываем карточку">
                 <span className="ai-badge-spinner" aria-hidden="true" />
-                AI
               </span>
             ) : (
               showIntent && (

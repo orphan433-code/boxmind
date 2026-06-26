@@ -16,7 +16,7 @@ export function PendingQueue({ items, onDismiss }: Props) {
             {item.status === 'pending' ? (
               <>
                 <span className="pending-spinner" aria-hidden />
-                <span>AI обрабатывает…</span>
+                <span>Дорабатываем…</span>
               </>
             ) : (
               <span>Не сохранилось: {item.error}</span>

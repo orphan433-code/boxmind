@@ -60,12 +60,17 @@ type BookmarkMetaFallback interface {
 	FallbackEnrich(ctx context.Context, rawURL string) (domain.BookmarkEnrichment, bool)
 }
 
+type MovieMetadataProvider interface {
+	Lookup(ctx context.Context, query domain.MovieMetadataQuery) (domain.MovieMetadata, bool)
+}
+
 type bookmarkService struct {
 	repo         BookmarkRepository
 	cache        URLEnrichmentCacheRepository
 	enricher     BookmarkEnricher
 	imageFetcher BookmarkImageFetcher
 	metaFallback BookmarkMetaFallback
+	movieMeta    MovieMetadataProvider
 }
 
 func NewBookmarkService(
@@ -84,12 +89,24 @@ func NewBookmarkServiceWithCache(
 	imageFetcher BookmarkImageFetcher,
 	metaFallback BookmarkMetaFallback,
 ) BookmarkService {
+	return NewBookmarkServiceWithCacheAndMovie(repo, cache, enricher, imageFetcher, metaFallback, nil)
+}
+
+func NewBookmarkServiceWithCacheAndMovie(
+	repo BookmarkRepository,
+	cache URLEnrichmentCacheRepository,
+	enricher BookmarkEnricher,
+	imageFetcher BookmarkImageFetcher,
+	metaFallback BookmarkMetaFallback,
+	movieMeta MovieMetadataProvider,
+) BookmarkService {
 	return &bookmarkService{
 		repo:         repo,
 		cache:        cache,
 		enricher:     enricher,
 		imageFetcher: imageFetcher,
 		metaFallback: metaFallback,
+		movieMeta:    movieMeta,
 	}
 }
 
@@ -280,6 +297,8 @@ func (s *bookmarkService) runEnrichLoop(userID, bookmarkID, rawURL string, hints
 		if err == nil && !gemini.IsUnavailableEnrichment(enrichment) {
 			finished := s.finishEnrichment(ctx, rawURL, hints, enrichment)
 			imageURL := s.bookmarkImageURL(ctx, userID, bookmarkID)
+			finished = s.applyMovieMetadataIfNeeded(ctx, userID, bookmarkID, rawURL, finished)
+			imageURL = s.bookmarkImageURL(ctx, userID, bookmarkID)
 			s.tryPersistEnrichment(ctx, userID, bookmarkID, rawURL, finished)
 			if cardquality.IsGoodEnough(finished, imageURL) {
 				return finished, true
@@ -336,6 +355,8 @@ func (s *bookmarkService) finalizeEnrichment(ctx context.Context, userID, bookma
 	merged = s.classifyAndMerge(ctx, rawURL, merged)
 
 	imageURL := s.bookmarkImageURL(ctx, userID, bookmarkID)
+	merged = s.applyMovieMetadataIfNeeded(ctx, userID, bookmarkID, rawURL, merged)
+	imageURL = s.bookmarkImageURL(ctx, userID, bookmarkID)
 	s.tryPersistEnrichment(ctx, userID, bookmarkID, rawURL, merged)
 
 	if !cardquality.IsAcceptable(merged, imageURL) {

@@ -2,10 +2,12 @@ import SwiftUI
 
 struct BookmarkRowView: View {
     let bookmark: Bookmark
+    var activeTag: String?
+    var onTagTap: ((String) -> Void)?
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            thumbnail
+            BookmarkThumbnail(bookmark: bookmark)
 
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 8) {
@@ -34,13 +36,18 @@ struct BookmarkRowView: View {
                         .background(Color.accentColor.opacity(0.12))
                         .clipShape(Capsule())
 
-                    ForEach(bookmark.tags.prefix(2), id: \.self) { tag in
-                        Text(tag)
+                    ForEach(bookmark.tags.prefix(3), id: \.self) { tag in
+                        TagChip(
+                            tag: tag,
+                            isActive: activeTag?.caseInsensitiveCompare(tag) == .orderedSame,
+                            onTap: onTagTap.map { handler in { handler(tag) } }
+                        )
+                    }
+
+                    if bookmark.tags.count > 3 {
+                        Text("+\(bookmark.tags.count - 3)")
                             .font(.caption)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color(.secondarySystemBackground))
-                            .clipShape(Capsule())
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
@@ -48,39 +55,8 @@ struct BookmarkRowView: View {
         .padding(.vertical, 6)
     }
 
-    @ViewBuilder
-    private var thumbnail: some View {
-        if let url = URL(string: bookmark.imageURL), !bookmark.imageURL.isEmpty {
-            AsyncImage(url: url) { phase in
-                switch phase {
-                case .success(let image):
-                    image
-                        .resizable()
-                        .scaledToFill()
-                default:
-                    placeholder
-                }
-            }
-            .frame(width: 56, height: 56)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-        } else {
-            placeholder
-        }
-    }
-
-    private var placeholder: some View {
-        RoundedRectangle(cornerRadius: 10)
-            .fill(Color(.secondarySystemBackground))
-            .frame(width: 56, height: 56)
-            .overlay {
-                Image(systemName: "link")
-                    .foregroundStyle(.secondary)
-            }
-    }
-
     private var displayTitle: String {
-        let title = bookmark.title.trimmingCharacters(in: .whitespacesAndNewlines)
-        return title.isEmpty ? bookmark.url : title
+        bookmark.displayTitle
     }
 }
 

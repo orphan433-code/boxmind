@@ -9,9 +9,11 @@
 /* Begin PBXBuildFile section */
 		06F0F221474BC0F73D0F8081 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7277041180C9736EF2E2A5 /* APIClient.swift */; };
 		080771F7BC2B0700167F3926 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E70AE1D9FAD0F80A9B2D9FBE /* LoginView.swift */; };
+		10C71790A5F848926D6B5C6B /* BookmarkDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE5096500FC389D327C0ED24 /* BookmarkDetailView.swift */; };
 		196D8627FA128E942F7B48A8 /* EnrichmentState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529C38C3F88403E0FBDA556B /* EnrichmentState.swift */; };
 		239390380E7BDD9694BA386D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 62826C0270DEB0E47C18DEAC /* Assets.xcassets */; };
 		2CD9E96838F2921C22798492 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8BB088D6EE5D15A8CBBDF9D /* KeychainStore.swift */; };
+		36CF8F75CDF17F25008B1178 /* BookmarkThumbnail.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA144C6FBC952B463F4D8F7B /* BookmarkThumbnail.swift */; };
 		3A460F922AC99A2738590E8A /* CategoryLabels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7AFD215BC1C18D3DAB88339 /* CategoryLabels.swift */; };
 		44C08382DEF692FFFD3F75E5 /* BookmarksViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7952E9E4D969A9CED7A57A5D /* BookmarksViewModel.swift */; };
 		46AA7928D7D8A8CA279D590E /* AuthModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942014E49A745F669E340A2 /* AuthModels.swift */; };
@@ -21,11 +23,13 @@
 		651B38CB5A6A614F092F10B5 /* BoxmindShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 050F7E3E207CD55BDAED5055 /* BoxmindShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		709D75D5D4C301D04D3C621F /* CategoryBookmarksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC1D7A53CCCB3A3A97B77F9B /* CategoryBookmarksView.swift */; };
 		72A892BB8508C89FC8E83FFC /* Bookmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6371CE009A560FE5D163FBAC /* Bookmark.swift */; };
+		73A3E73D1B2DE6252FF64EE3 /* Brand.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7B18B234BE4F4003DB3D2DB /* Brand.swift */; };
 		79E6ACE6A501E68D95277A50 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAAEAA184095C1F7F62DE604 /* ShareViewController.swift */; };
 		83C2F5F0B9ADEC0524849C12 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F064CE856E889024B78B607B /* HomeView.swift */; };
 		88B3EC7910C38BF396C8E870 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98BDA03F261743481EF10EDB /* LoginViewModel.swift */; };
 		9241E960307A4D0021B83480 /* CategoriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E99720078333C611C7EB8B8 /* CategoriesView.swift */; };
 		93F1157E9E1D0636A7563F6F /* BoxmindApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E22C59E5AAFA121EA63D1E66 /* BoxmindApp.swift */; };
+		9A50D2D8219CCF19A5C8D01B /* TagViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30D4EFEEDD5E6A9DBDEF0487 /* TagViews.swift */; };
 		A8B4B855C73BEB03E6389A03 /* APIConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D9B0ECB212AA7BBBB9CEA8C /* APIConfig.swift */; };
 		AED5A8D041B064EED7C25A6D /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24B05689DB2DDE35CC4D7327 /* SessionStore.swift */; };
 		B27906CD10758A496C570EAE /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3AC5DC983C9B0BF5A71BB25 /* RootView.swift */; };
@@ -68,6 +72,7 @@
 		24B05689DB2DDE35CC4D7327 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
 		2C7277041180C9736EF2E2A5 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		2D9B0ECB212AA7BBBB9CEA8C /* APIConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIConfig.swift; sourceTree = "<group>"; };
+		30D4EFEEDD5E6A9DBDEF0487 /* TagViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagViews.swift; sourceTree = "<group>"; };
 		4BF90ECE4CBD6D9EB9040894 /* Boxmind.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Boxmind.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		529C38C3F88403E0FBDA556B /* EnrichmentState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnrichmentState.swift; sourceTree = "<group>"; };
 		6060081B181A2CF9DD15B65D /* AddBookmarkSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddBookmarkSheet.swift; sourceTree = "<group>"; };
@@ -82,6 +87,9 @@
 		BAAEAA184095C1F7F62DE604 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		BF22FE39E021E97E4F49FD34 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		C942014E49A745F669E340A2 /* AuthModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthModels.swift; sourceTree = "<group>"; };
+		D7B18B234BE4F4003DB3D2DB /* Brand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Brand.swift; sourceTree = "<group>"; };
+		DA144C6FBC952B463F4D8F7B /* BookmarkThumbnail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkThumbnail.swift; sourceTree = "<group>"; };
+		DE5096500FC389D327C0ED24 /* BookmarkDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkDetailView.swift; sourceTree = "<group>"; };
 		E19692AD25BD196A27FB605D /* BoxmindShare.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BoxmindShare.entitlements; sourceTree = "<group>"; };
 		E22C59E5AAFA121EA63D1E66 /* BoxmindApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoxmindApp.swift; sourceTree = "<group>"; };
 		E3AC5DC983C9B0BF5A71BB25 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -101,9 +109,11 @@
 			isa = PBXGroup;
 			children = (
 				6060081B181A2CF9DD15B65D /* AddBookmarkSheet.swift */,
+				DE5096500FC389D327C0ED24 /* BookmarkDetailView.swift */,
 				E5AE3380A4CE2EE2C03BB5A8 /* BookmarkListView.swift */,
 				F994AACD3913DA0D230BA613 /* BookmarkRowView.swift */,
 				7952E9E4D969A9CED7A57A5D /* BookmarksViewModel.swift */,
+				DA144C6FBC952B463F4D8F7B /* BookmarkThumbnail.swift */,
 			);
 			path = Bookmarks;
 			sourceTree = "<group>";
@@ -215,8 +225,10 @@
 		97937854E1B404974D450FAE /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				D7B18B234BE4F4003DB3D2DB /* Brand.swift */,
 				F7AFD215BC1C18D3DAB88339 /* CategoryLabels.swift */,
 				529C38C3F88403E0FBDA556B /* EnrichmentState.swift */,
+				30D4EFEEDD5E6A9DBDEF0487 /* TagViews.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -388,10 +400,13 @@
 				545CE4F74D30AC45FC5B614F /* AppGroupStore.swift in Sources */,
 				46AA7928D7D8A8CA279D590E /* AuthModels.swift in Sources */,
 				72A892BB8508C89FC8E83FFC /* Bookmark.swift in Sources */,
+				10C71790A5F848926D6B5C6B /* BookmarkDetailView.swift in Sources */,
 				F0050FC53568775FBD2C5BF0 /* BookmarkListView.swift in Sources */,
 				D0C53803081045450896CFB1 /* BookmarkRowView.swift in Sources */,
+				36CF8F75CDF17F25008B1178 /* BookmarkThumbnail.swift in Sources */,
 				44C08382DEF692FFFD3F75E5 /* BookmarksViewModel.swift in Sources */,
 				93F1157E9E1D0636A7563F6F /* BoxmindApp.swift in Sources */,
+				73A3E73D1B2DE6252FF64EE3 /* Brand.swift in Sources */,
 				9241E960307A4D0021B83480 /* CategoriesView.swift in Sources */,
 				709D75D5D4C301D04D3C621F /* CategoryBookmarksView.swift in Sources */,
 				3A460F922AC99A2738590E8A /* CategoryLabels.swift in Sources */,
@@ -403,6 +418,7 @@
 				D1247AACDE9448238AFE5683 /* MainTabView.swift in Sources */,
 				B27906CD10758A496C570EAE /* RootView.swift in Sources */,
 				AED5A8D041B064EED7C25A6D /* SessionStore.swift in Sources */,
+				9A50D2D8219CCF19A5C8D01B /* TagViews.swift in Sources */,
 				4A3F73C6FD46C4A38E33DB5C /* User.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

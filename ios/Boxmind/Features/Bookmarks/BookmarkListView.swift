@@ -1,23 +1,37 @@
 import SwiftUI
 
 struct BookmarkListView: View {
-    @Environment(\.openURL) private var openURL
-
     let bookmarks: [Bookmark]
     let session: SessionStore
-    let viewModel: BookmarksViewModel
+    @Bindable var viewModel: BookmarksViewModel
+    var activeTag: String?
+    var onTagTap: ((String) -> Void)?
+    var onClearTag: (() -> Void)?
     var emptyMessage: String = "Ничего не найдено"
+
+    @State private var selected: Bookmark?
 
     var body: some View {
         if bookmarks.isEmpty {
             ContentUnavailableView(emptyMessage, systemImage: "magnifyingglass")
         } else {
             List {
+                if let activeTag, let onClearTag {
+                    ActiveTagFilterBar(tag: activeTag, onClear: onClearTag)
+                        .listRowInsets(EdgeInsets())
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                }
+
                 ForEach(bookmarks) { bookmark in
                     Button {
-                        openBookmark(bookmark)
+                        selected = bookmark
                     } label: {
-                        BookmarkRowView(bookmark: bookmark)
+                        BookmarkRowView(
+                            bookmark: bookmark,
+                            activeTag: activeTag,
+                            onTagTap: onTagTap
+                        )
                     }
                     .buttonStyle(.plain)
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -30,14 +44,9 @@ struct BookmarkListView: View {
                 }
             }
             .listStyle(.plain)
+            .navigationDestination(item: $selected) { bookmark in
+                BookmarkDetailView(bookmark: bookmark, viewModel: viewModel)
+            }
         }
-    }
-
-    private func openBookmark(_ bookmark: Bookmark) {
-        guard let url = URL(string: bookmark.url) else {
-            viewModel.errorMessage = "Не удалось открыть ссылку"
-            return
-        }
-        openURL(url)
     }
 }

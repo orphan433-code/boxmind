@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Boxmind",
   "version": "0.5.1",
-  "description": "Закинь ссылку в ящик — AI сам разложит",
+  "description": "Умный порядок для ваших ссылок",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",

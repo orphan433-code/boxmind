@@ -128,7 +128,7 @@ async function saveBookmarkInBackground(tabId, token, url) {
     }
 
     if (status === 409) {
-      await showToast(tabId, "Уже в ящике", "error");
+      await showToast(tabId, "Уже сохранено", "error");
       return;
     }
 

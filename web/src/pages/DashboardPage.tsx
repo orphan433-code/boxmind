@@ -124,7 +124,7 @@ export function DashboardPage() {
     if (!token) return;
 
     if (bookmarks.some((bookmark) => bookmarkUrlsMatch(bookmark.url, url))) {
-      setError("эта ссылка уже в ящике");
+      setError("Уже сохранена");
       return;
     }
 
@@ -157,7 +157,7 @@ export function DashboardPage() {
         const message =
           err instanceof Error ? err.message : "не удалось сохранить";
         const friendlyMessage = message.includes("already exists")
-          ? "эта ссылка уже в ящике"
+          ? "Уже сохранена"
           : message;
         setPending((prev) =>
           prev.map((item) =>

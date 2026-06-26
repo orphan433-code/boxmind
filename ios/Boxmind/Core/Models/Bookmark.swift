@@ -1,6 +1,6 @@
 import Foundation
 
-struct Bookmark: Codable, Identifiable, Equatable, Sendable {
+struct Bookmark: Codable, Identifiable, Equatable, Hashable, Sendable {
     let id: String
     let userID: String
     let url: String

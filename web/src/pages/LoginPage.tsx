@@ -1,40 +1,41 @@
-import { useState, type FormEvent } from 'react'
-import { requestLogin, verifyLogin } from '../api/client'
-import { useAuth } from '../auth/AuthContext'
+import { useState, type FormEvent } from "react";
+import { requestLogin, verifyLogin } from "../api/client";
+import { useAuth } from "../auth/AuthContext";
+import { TAGLINE } from "../brand";
 
 export function LoginPage() {
-  const { login } = useAuth()
-  const [email, setEmail] = useState('')
-  const [code, setCode] = useState('')
-  const [step, setStep] = useState<'email' | 'code'>('email')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const { login } = useAuth();
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [step, setStep] = useState<"email" | "code">("email");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleEmailSubmit(event: FormEvent) {
-    event.preventDefault()
-    setError('')
-    setLoading(true)
+    event.preventDefault();
+    setError("");
+    setLoading(true);
     try {
-      await requestLogin(email.trim())
-      setStep('code')
+      await requestLogin(email.trim());
+      setStep("code");
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'ошибка')
+      setError(err instanceof Error ? err.message : "ошибка");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function handleCodeSubmit(event: FormEvent) {
-    event.preventDefault()
-    setError('')
-    setLoading(true)
+    event.preventDefault();
+    setError("");
+    setLoading(true);
     try {
-      const result = await verifyLogin(email.trim(), code.trim())
-      login(result.tokens.access_token, result.user)
+      const result = await verifyLogin(email.trim(), code.trim());
+      login(result.tokens.access_token, result.user);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'ошибка')
+      setError(err instanceof Error ? err.message : "ошибка");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -42,11 +43,12 @@ export function LoginPage() {
     <div className="login-page">
       <div className="login-card">
         <header className="login-brand">
+          <img className="login-logo" src="/brand-icon.png" width="64" height="64" alt="Boxmind" />
           <h1>Boxmind</h1>
-          <p className="login-tagline">Закинь ссылку в ящик — AI сам разложит.</p>
+          <p className="login-tagline">{TAGLINE}</p>
         </header>
 
-        {step === 'email' ? (
+        {step === "email" ? (
           <form className="login-form" onSubmit={handleEmailSubmit}>
             <div className="login-field">
               <label htmlFor="email">Email</label>
@@ -62,13 +64,13 @@ export function LoginPage() {
               />
             </div>
             <button type="submit" className="login-submit" disabled={loading}>
-              {loading ? 'Отправляем…' : 'Получить код'}
+              {loading ? "Отправляем…" : "Получить код"}
             </button>
           </form>
         ) : (
           <form className="login-form" onSubmit={handleCodeSubmit}>
             <p className="login-hint">
-              Код отправлен на <strong>{email}</strong>. В dev смотри логи сервера.
+              Отправили код на <strong>{email}</strong>. Проверь почту.
             </p>
             <div className="login-field">
               <label htmlFor="code">Код из письма</label>
@@ -86,14 +88,14 @@ export function LoginPage() {
               />
             </div>
             <button type="submit" className="login-submit" disabled={loading}>
-              {loading ? 'Входим…' : 'Войти'}
+              {loading ? "Входим…" : "Войти"}
             </button>
             <button
               type="button"
               className="login-back link-btn"
               onClick={() => {
-                setStep('email')
-                setError('')
+                setStep("email");
+                setError("");
               }}
             >
               Другой email
@@ -108,5 +110,5 @@ export function LoginPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

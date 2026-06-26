@@ -28,14 +28,30 @@ body {
 
 .logo {
   display: block;
-  margin: 0 auto;
-  border-radius: 12px;
+  margin: 0 auto 4px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 h1 {
   margin: 0;
   font-size: 1.15rem;
   letter-spacing: -0.02em;
+}
+
+.tagline {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--muted);
 }
 
 p {

@@ -1,4 +1,4 @@
-import Foundation
+import SwiftUI
 
 enum CategoryLabels {
     static let order = [
@@ -49,6 +49,24 @@ enum CategoryLabels {
 
     static func icon(for category: String) -> String {
         icons[category] ?? "folder.fill"
+    }
+
+    static let colors: [String: Color] = [
+        "movies": .pink,
+        "entertainment": .pink,
+        "music": .purple,
+        "articles": .orange,
+        "news": .orange,
+        "learning": .green,
+        "programming": .blue,
+        "tools": .blue,
+        "shopping": .teal,
+        "design": .indigo,
+        "other": .gray
+    ]
+
+    static func color(for category: String) -> Color {
+        colors[category] ?? .accentColor
     }
 
     static func sorted(_ categories: some Sequence<String>) -> [String] {

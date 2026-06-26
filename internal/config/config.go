@@ -17,6 +17,7 @@ type Config struct {
 	OTPTTL         time.Duration
 	GeminiAPIKey   string
 	GeminiModel    string
+	TMDBAPIKey     string
 	Mail           MailConfig
 }
 
@@ -91,6 +92,7 @@ func Load() Config {
 		OTPTTL:         otpTTL,
 		GeminiAPIKey:   os.Getenv("GEMINI_API_KEY"),
 		GeminiModel:    geminiModel(os.Getenv("GEMINI_MODEL")),
+		TMDBAPIKey:     os.Getenv("TMDB_API_KEY"),
 		Mail: MailConfig{
 			From: os.Getenv("MAIL_FROM"),
 			Resend: ResendConfig{

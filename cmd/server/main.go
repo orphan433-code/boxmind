@@ -20,6 +20,7 @@ import (
 	"pet-link/internal/middleware"
 	"pet-link/internal/pkg/gemini"
 	"pet-link/internal/pkg/jwt"
+	"pet-link/internal/pkg/movies"
 	"pet-link/internal/pkg/pagemeta"
 	"pet-link/internal/repository/postgres"
 	"pet-link/internal/service"
@@ -52,7 +53,8 @@ func main() {
 	}
 	imageFetcher := pagemeta.NewImageFetcher(pagemeta.NewImageHTTPExtractor())
 	metaFallback := pagemeta.NewMetaFallback(pagemeta.NewHTTPExtractor())
-	bookmarkService := service.NewBookmarkServiceWithCache(bookmarkRepo, cacheRepo, geminiEnricher, imageFetcher, metaFallback)
+	movieMetadata := movies.NewTMDBProvider(cfg.TMDBAPIKey)
+	bookmarkService := service.NewBookmarkServiceWithCacheAndMovie(bookmarkRepo, cacheRepo, geminiEnricher, imageFetcher, metaFallback, movieMetadata)
 	bookmarkHandler := handler.NewBookmarkHandler(bookmarkService)
 
 	otpRepo := postgres.NewOTPRepository(db)
