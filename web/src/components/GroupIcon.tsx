@@ -40,14 +40,6 @@ export function GroupIcon({ section }: Props) {
           <circle cx="17" cy="16" r="2.5" />
         </svg>
       );
-    case "play":
-      return (
-        <svg {...common}>
-          <path d="M8 12h4M10 10v4" />
-          <path d="M15 11h.01M17 13h.01" />
-          <path d="M6 12a8 8 0 0 1 16 0v2a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3z" />
-        </svg>
-      );
     case "read":
       return (
         <svg {...common}>

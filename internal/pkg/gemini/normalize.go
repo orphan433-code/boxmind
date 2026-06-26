@@ -17,7 +17,6 @@ var allowedCategories = map[string]struct{}{
 	"programming":   {},
 	"design":        {},
 	"news":          {},
-	"gaming":        {},
 	"movies":        {},
 	"shopping":      {},
 	"articles":      {},
@@ -42,7 +41,8 @@ var categoryAliases = map[string]string{
 	"reference":   "articles",
 	"article":     "articles",
 	"sheet-music": "learning",
-	"game":        "gaming",
+	"game":        "entertainment",
+	"gaming":      "entertainment",
 }
 
 var tagAliases = map[string]string{

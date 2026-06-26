@@ -4,7 +4,6 @@ export type BrowseSectionId =
   | "recent"
   | "watch"
   | "listen"
-  | "play"
   | "read"
   | "learn"
   | "code"
@@ -32,7 +31,7 @@ export const BROWSE_SECTIONS: BrowseSection[] = [
   {
     id: "watch",
     label: "Смотреть",
-    categories: ["movies", "entertainment"],
+    categories: ["movies", "entertainment", "gaming"],
     emptyHint: "Здесь будут фильмы, сериалы и аниме",
   },
   {
@@ -40,12 +39,6 @@ export const BROWSE_SECTIONS: BrowseSection[] = [
     label: "Слушать",
     categories: ["music"],
     emptyHint: "Здесь будет музыка — треки, альбомы, плейлисты",
-  },
-  {
-    id: "play",
-    label: "Игры",
-    categories: ["gaming"],
-    emptyHint: "Здесь будут игры и игровые ссылки",
   },
   {
     id: "read",

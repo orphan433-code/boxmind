@@ -49,7 +49,7 @@ Description rules:
 
 Category rules:
 - Pick ONE exact value from:
-  programming, design, news, gaming, movies, shopping, articles, learning, music, tools, entertainment, other
+  programming, design, news, movies, shopping, articles, learning, music, tools, entertainment, other
 
 Classification algorithm (FOLLOW IN THIS ORDER — main rule):
 
@@ -58,14 +58,18 @@ Platform overrides (apply BEFORE Step 1 — these beat generic "watch video" rul
 youtube.com / youtu.be — decide by TITLE and content type, NOT by domain alone:
   course / урок / лекция / "полный курс" / tutorial / how-to / "для начинающих" -> learning
     tags: [курс|урок|туториал, topic] — e.g. ["курс", "golang"]
-  gameplay / match / esports / funny gaming video / "катка" / CS2/CS:GO -> gaming
-    tags: [геймплей|обзор|киберспорт, game] — e.g. ["геймплей", "cs2"]
+  gameplay / match / esports / funny gaming video / "катка" / CS2/CS:GO -> entertainment
+    tags: ["видео"|"стрим", game] — e.g. ["видео", "cs2"]
+  game guide / walkthrough / прохождение / "гайд по игре" / build -> learning
+    tags: ["гайд", game] — e.g. ["гайд", "майнкрафт"]
   film / series / anime / vlog / documentary / interview / politics -> movies or entertainment
     tags: [фильм|сериал|аниме|видео, genre/topic]
   NEVER: treat all YouTube as entertainment.
   NEVER: course -> programming (action is study -> learning).
+  NEVER: a gaming video is its own category — watching gameplay is entertainment, a guide is learning.
   e.g. "Полный курс по Golang" -> learning, tags: ["курс", "golang"]
-  e.g. "Мясник vs киберспортсмен CS2" -> gaming, tags: ["геймплей", "cs2"]
+  e.g. "Мясник vs киберспортсмен CS2" -> entertainment, tags: ["видео", "cs2"]
+  e.g. "Гайд по сборке базы в Rust" -> learning, tags: ["гайд", "rust"]
 
 tiktok.com / instagram.com (Reels) / YouTube Shorts — short-form video.
   Decide by the CAPTION/title meaning, NOT by "it is a short clip":
@@ -85,7 +89,7 @@ Step 1 — What does the USER DO on this page? Category = action/format, NOT top
   READ news article (text on a news site) -> news
   LISTEN to music (track, album, playlist) -> music
   USE while coding (official docs, API reference, package readme) -> programming
-  PLAY or read about games -> gaming
+  WATCH a gaming video (gameplay, stream, clip) -> entertainment; a game guide -> learning; game mods/tools/store -> tools
   SHOP (product listing, store) -> shopping
 
 Step 2 — What is it ABOUT? Topic goes in tag #2 only — never pick category from topic alone.
@@ -181,7 +185,7 @@ Tags rules:
   programming -> документация, справка, профиль разработчика + topic (golang, react, devops). NEVER курс, урок, туториал here.
   shopping -> товар + category (hardware, electronics, одежда)
   news -> новость + topic (tech, politics, sport)
-  gaming -> игра, гайд, обзор + genre or platform
+  game content -> watching gameplay/stream: entertainment ["видео"|"стрим", game]; guide: learning ["гайд", game]; mods/tools: tools ["инструмент", game]
 
 - Do NOT use: franchise names, character names, universe titles, site names, cities, "online", random topics like "космос" or "nvidia" when a genre fits better.
 
