@@ -335,7 +335,7 @@ func (s *bookmarkService) classifyAndMerge(ctx context.Context, rawURL string, b
 		return base
 	}
 
-	return cardquality.Merge(base, gemini.NormalizeEnrichment(classified))
+	return mergeClassifiedEnrichment(rawURL, base, classified)
 }
 
 func enrichmentFromBookmark(bookmark domain.Bookmark) domain.BookmarkEnrichment {
@@ -349,6 +349,33 @@ func enrichmentFromBookmark(bookmark domain.Bookmark) domain.BookmarkEnrichment 
 
 func mergeEnrichment(base, patch domain.BookmarkEnrichment) domain.BookmarkEnrichment {
 	return cardquality.Merge(base, patch)
+}
+
+func mergeClassifiedEnrichment(rawURL string, base, classified domain.BookmarkEnrichment) domain.BookmarkEnrichment {
+	normalized := gemini.NormalizeEnrichment(classified)
+	merged := cardquality.Merge(base, normalized)
+
+	source := titleSourceForClassification(rawURL, base.Title)
+	if shouldPreserveBaseTitle(source, base.Title) {
+		merged.Title = strings.TrimSpace(base.Title)
+	} else if shouldPreferClassifiedTitle(source, base.Title, normalized.Title) {
+		merged.Title = normalized.Title
+	}
+
+	return merged
+}
+
+func shouldPreserveBaseTitle(source, baseTitle string) bool {
+	return source == "metadata_or_user" && cardquality.GoodTitle(baseTitle)
+}
+
+func shouldPreferClassifiedTitle(source, baseTitle, classifiedTitle string) bool {
+	classifiedTitle = strings.TrimSpace(classifiedTitle)
+	if classifiedTitle == "" || strings.EqualFold(strings.TrimSpace(baseTitle), classifiedTitle) {
+		return false
+	}
+
+	return (source == "url_slug" || source == "url") && cardquality.GoodTitle(classifiedTitle)
 }
 
 func hasContentForClassification(enrichment domain.BookmarkEnrichment) bool {

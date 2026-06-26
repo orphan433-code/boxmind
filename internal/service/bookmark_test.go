@@ -64,3 +64,42 @@ func TestClassificationCompleteForURLRequiresSlugTitleNormalization(t *testing.T
 		t.Fatal("expected trusted metadata title with category/tags to be complete")
 	}
 }
+
+func TestMergeClassifiedEnrichmentPrefersClassifiedTitleForSlug(t *testing.T) {
+	rawURL := "http://hdrezka.co/films/action/90232-klinki-hraniteley-burya-v-pustyne-2026.html"
+	base := domain.BookmarkEnrichment{
+		Title:    "Klinki Hraniteley Burya V Pustyne",
+		Category: "movies",
+		Tags:     []string{"фильм", "боевик"},
+	}
+	classified := domain.BookmarkEnrichment{
+		Title:       "Клинки хранителей: Буря в пустыне",
+		Description: "Фильм о приключениях и сражениях в пустыне.",
+		Category:    "movies",
+		Tags:        []string{"фильм", "боевик"},
+	}
+
+	got := mergeClassifiedEnrichment(rawURL, base, classified)
+	if got.Title != classified.Title {
+		t.Fatalf("title: got %q, want %q", got.Title, classified.Title)
+	}
+}
+
+func TestMergeClassifiedEnrichmentKeepsTrustedMetadataTitle(t *testing.T) {
+	rawURL := "https://www.youtube.com/watch?v=abc123"
+	base := domain.BookmarkEnrichment{
+		Title:    "Blade of the Guardians",
+		Category: "movies",
+		Tags:     []string{"фильм", "боевик"},
+	}
+	classified := domain.BookmarkEnrichment{
+		Title:    "Клинки хранителей",
+		Category: "movies",
+		Tags:     []string{"фильм", "боевик"},
+	}
+
+	got := mergeClassifiedEnrichment(rawURL, base, classified)
+	if got.Title != base.Title {
+		t.Fatalf("title: got %q, want %q", got.Title, base.Title)
+	}
+}
