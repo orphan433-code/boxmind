@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"net/url"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -12,6 +13,15 @@ import (
 	"pet-link/internal/domain"
 	"pet-link/internal/pkg/cardquality"
 	"pet-link/internal/pkg/gemini"
+)
+
+// Confidence tiers: always query TMDB for movie-like cards, but only apply
+// fields when the match score clears the relevant bar.
+const (
+	minMovieConfidencePoster = 0.55
+	minMovieConfidenceDesc   = 0.62
+	minMovieConfidenceTitle  = 0.75
+	minMovieConfidenceMeta   = 0.85
 )
 
 // isNilProvider guards against a typed-nil interface (e.g. a nil *TMDBProvider
@@ -32,6 +42,10 @@ func isNilProvider(p MovieMetadataProvider) bool {
 var (
 	movieTitleNoise = regexp.MustCompile(`(?i)(смотреть\s+онлайн|скачать\s+бесплатно|скачать|бесплатно|без\s+регистрации|watch\s+online|free|1080p|720p|hd)`)
 	yearPattern     = regexp.MustCompile(`\b(19\d{2}|20\d{2})\b`)
+	titleYearSuffix = regexp.MustCompile(`\s*[\(\[]\s*(19\d{2}|20\d{2})\s*[\)\]]\s*$`)
+
+	genericMovieDescRe = regexp.MustCompile(`(?i)(доступн[а-яё]*\s+для\s+просмотра|для\s+просмотра\s+онлайн|смотреть\s+онлайн|фильм\s+или\s+сериал|это\s+(драматическ[а-яё]+\s+)?(короткое\s+видео|фильм|сериал|аниме))`)
+	sourceFocusedDescRe = regexp.MustCompile(`(?i)(видеоматериал|медиахолдинг|новостн[а-яё]*\s+(лент[а-яё]*|сайт|портал)|из\s+известн[а-яё]*\s+(российск[а-яё]*\s+)?(медиа|издан))`)
 )
 
 func (s *bookmarkService) applyMovieMetadataIfNeeded(ctx context.Context, userID, bookmarkID, rawURL string, enrichment domain.BookmarkEnrichment) domain.BookmarkEnrichment {
@@ -45,8 +59,7 @@ func (s *bookmarkService) applyMovieMetadataIfNeeded(ctx context.Context, userID
 	}
 
 	imageURL := strings.TrimSpace(bookmark.ImageURL)
-	if !needsMovieMetadata(enrichment, imageURL) {
-		log.Printf("[MOVIE-LOOKUP] skip reason=good_card url=%s category=%s image=%t", rawURL, enrichment.Category, imageURL != "")
+	if !shouldAttemptMovieLookup(enrichment, imageURL) {
 		return enrichment
 	}
 
@@ -66,8 +79,18 @@ func (s *bookmarkService) applyMovieMetadataIfNeeded(ctx context.Context, userID
 		return enrichment
 	}
 
-	merged := mergeMovieMetadata(enrichment, meta.Enrichment, imageURL)
-	if imageURL == "" && strings.TrimSpace(meta.ImageURL) != "" {
+	if meta.Confidence < minMovieConfidencePoster {
+		log.Printf(
+			"[MOVIE-LOOKUP] low_confidence query=%q url=%s confidence=%.2f",
+			query.Title,
+			rawURL,
+			meta.Confidence,
+		)
+		return enrichment
+	}
+
+	merged := mergeMovieMetadata(enrichment, meta.Enrichment, imageURL, meta.Confidence)
+	if imageURL == "" && strings.TrimSpace(meta.ImageURL) != "" && meta.Confidence >= minMovieConfidencePoster {
 		if err := s.repo.UpdateImageURL(ctx, userID, bookmarkID, meta.ImageURL); err != nil && !errors.Is(err, domain.ErrBookmarkNotFound) {
 			log.Printf("[MOVIE-LOOKUP] image update failed url=%s err=%v", rawURL, err)
 		} else {
@@ -87,20 +110,31 @@ func (s *bookmarkService) applyMovieMetadataIfNeeded(ctx context.Context, userID
 	return merged
 }
 
-func needsMovieMetadata(enrichment domain.BookmarkEnrichment, imageURL string) bool {
-	if !looksLikeMovie(enrichment) {
+// shouldAttemptMovieLookup decides whether to call TMDB. We query whenever the
+// card looks movie-related, without skipping "good enough" cards upfront —
+// confidence tiers in merge decide what to apply.
+func shouldAttemptMovieLookup(enrichment domain.BookmarkEnrichment, imageURL string) bool {
+	if looksLikeMovie(enrichment) {
+		return true
+	}
+	return probableMovieCard(enrichment, imageURL)
+}
+
+func probableMovieCard(enrichment domain.BookmarkEnrichment, imageURL string) bool {
+	category := strings.TrimSpace(enrichment.Category)
+	if category != "movies" && category != "entertainment" {
+		return false
+	}
+	if strings.TrimSpace(enrichment.Title) == "" {
 		return false
 	}
 	if strings.TrimSpace(imageURL) == "" {
 		return true
 	}
-	if movieTitleNoise.MatchString(enrichment.Title) {
+	if genericMovieDescription(enrichment.Description) || sourceFocusedDescription(enrichment.Description) {
 		return true
 	}
-	if !cardquality.GoodDescription(enrichment.Description) || genericMovieDescription(enrichment.Description) {
-		return true
-	}
-	return !cardquality.IsAcceptable(enrichment, imageURL)
+	return !cardquality.IsGoodEnough(enrichment, imageURL)
 }
 
 func looksLikeMovie(enrichment domain.BookmarkEnrichment) bool {
@@ -109,30 +143,42 @@ func looksLikeMovie(enrichment domain.BookmarkEnrichment) bool {
 	}
 	for _, tag := range enrichment.Tags {
 		switch strings.ToLower(strings.TrimSpace(tag)) {
-		case "фильм", "сериал", "аниме", "кино":
+		case "фильм", "сериал", "аниме", "кино",
+			"драма", "комедия", "боевик", "триллер", "ужасы",
+			"фантастика", "приключения", "детектив", "романтика",
+			"мультфильм", "семейное", "документальное":
 			return true
 		}
 	}
 	return false
 }
 
-func mergeMovieMetadata(base, movie domain.BookmarkEnrichment, imageURL string) domain.BookmarkEnrichment {
+func mergeMovieMetadata(base, movie domain.BookmarkEnrichment, imageURL string, confidence float64) domain.BookmarkEnrichment {
 	movie = gemini.NormalizeEnrichment(movie)
 	out := base
 
-	if movie.Title != "" && (!cardquality.GoodTitle(base.Title) || movieTitleNoise.MatchString(base.Title)) {
-		out.Title = movie.Title
+	if confidence >= minMovieConfidenceTitle && movie.Title != "" {
+		if !cardquality.GoodTitle(base.Title) || movieTitleNoise.MatchString(base.Title) {
+			out.Title = movie.Title
+		}
 	}
-	if movie.Description != "" && (!cardquality.GoodDescription(base.Description) || genericMovieDescription(base.Description)) {
-		out.Description = movie.Description
+	if confidence >= minMovieConfidenceDesc && movie.Description != "" {
+		if !cardquality.GoodDescription(base.Description) ||
+			genericMovieDescription(base.Description) ||
+			sourceFocusedDescription(base.Description) {
+			out.Description = movie.Description
+		}
 	}
-	if out.Category == "" || out.Category == "other" {
-		out.Category = "movies"
+	if confidence >= minMovieConfidenceMeta {
+		if out.Category == "" || out.Category == "other" {
+			out.Category = "movies"
+		}
+		if len(out.Tags) < 2 && len(movie.Tags) >= 2 {
+			out.Tags = movie.Tags
+		}
 	}
-	if len(out.Tags) < 2 && len(movie.Tags) >= 2 {
-		out.Tags = movie.Tags
-	}
-	if strings.TrimSpace(imageURL) == "" && movie.Title != "" && movie.Title != out.Title && movieTitleNoise.MatchString(out.Title) {
+	if strings.TrimSpace(imageURL) == "" && confidence >= minMovieConfidenceTitle &&
+		movie.Title != "" && movie.Title != out.Title && movieTitleNoise.MatchString(out.Title) {
 		out.Title = movie.Title
 	}
 
@@ -140,17 +186,20 @@ func mergeMovieMetadata(base, movie domain.BookmarkEnrichment, imageURL string) 
 }
 
 func genericMovieDescription(description string) bool {
-	value := strings.ToLower(strings.TrimSpace(description))
-	switch value {
-	case "", "это драматический сериал.", "это драматический фильм.", "это короткое видео.", "это сериал.", "это фильм.":
+	value := strings.TrimSpace(description)
+	if value == "" {
 		return true
-	default:
-		return false
 	}
+	return genericMovieDescRe.MatchString(value)
+}
+
+func sourceFocusedDescription(description string) bool {
+	return sourceFocusedDescRe.MatchString(strings.TrimSpace(description))
 }
 
 func movieLookupTitle(enrichment domain.BookmarkEnrichment, rawURL string) string {
 	title := strings.TrimSpace(enrichment.Title)
+	title = titleYearSuffix.ReplaceAllString(title, "")
 	title = movieTitleNoise.ReplaceAllString(title, " ")
 	title = strings.Join(strings.Fields(title), " ")
 	if title != "" {
@@ -189,8 +238,13 @@ func movieLookupYear(values ...string) int {
 }
 
 func titleHintFromURLForMovie(rawURL string) (string, bool) {
-	parts := strings.FieldsFunc(rawURL, func(r rune) bool {
-		return r == '/' || r == '-' || r == '_' || r == '.' || r == '?'
+	value := strings.TrimSpace(rawURL)
+	if parsed, err := url.Parse(value); err == nil && parsed.Path != "" {
+		value = parsed.Path
+	}
+
+	parts := strings.FieldsFunc(value, func(r rune) bool {
+		return r == '/' || r == '-' || r == '_' || r == '.' || r == '?' || r == '#'
 	})
 	if len(parts) == 0 {
 		return "", false
@@ -198,7 +252,8 @@ func titleHintFromURLForMovie(rawURL string) (string, bool) {
 
 	words := make([]string, 0, len(parts))
 	for _, part := range parts {
-		if part == "" || yearPattern.MatchString(part) {
+		part = strings.TrimSpace(part)
+		if part == "" || yearPattern.MatchString(part) || isURLTitleJunk(part) {
 			continue
 		}
 		if _, err := strconv.Atoi(part); err == nil {
@@ -210,4 +265,13 @@ func titleHintFromURLForMovie(rawURL string) (string, bool) {
 		return "", false
 	}
 	return strings.Join(words, " "), true
+}
+
+func isURLTitleJunk(part string) bool {
+	switch strings.ToLower(strings.TrimSpace(part)) {
+	case "http", "https", "www", "html", "htm", "php", "asp", "aspx", "watch", "online":
+		return true
+	default:
+		return false
+	}
 }

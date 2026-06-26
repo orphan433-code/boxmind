@@ -21,7 +21,7 @@ import (
 const (
 	tmdbAPIBase     = "https://api.themoviedb.org/3"
 	tmdbImageBase   = "https://image.tmdb.org/t/p/w500"
-	minTMDBScore    = 0.62
+	minTMDBScore    = 0.55 // minimum similarity to return a candidate; merge layer applies stricter bars per field
 	minTMDBVoteHint = 3
 )
 
