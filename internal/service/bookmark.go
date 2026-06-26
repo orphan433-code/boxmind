@@ -28,7 +28,7 @@ type BookmarkRepository interface {
 
 type BookmarkEnricher interface {
 	Enrich(ctx context.Context, rawURL string) (domain.BookmarkEnrichment, error)
-	Classify(ctx context.Context, pageURL, title, description string) (domain.BookmarkEnrichment, error)
+	Classify(ctx context.Context, pageURL, title, description, titleSource string) (domain.BookmarkEnrichment, error)
 }
 
 type BookmarkImageFetcher interface {
@@ -325,7 +325,7 @@ func (s *bookmarkService) classifyAndMerge(ctx context.Context, rawURL string, b
 	classifyCtx, cancel := context.WithTimeout(ctx, enrichAttemptTimeout)
 	defer cancel()
 
-	classified, err := s.enricher.Classify(classifyCtx, rawURL, base.Title, base.Description)
+	classified, err := s.enricher.Classify(classifyCtx, rawURL, base.Title, base.Description, titleSourceForClassification(rawURL, base.Title))
 	if err != nil {
 		log.Printf("bookmark classify failed for %s: %v", rawURL, err)
 		return base
@@ -359,6 +359,23 @@ func hasContentForClassification(enrichment domain.BookmarkEnrichment) bool {
 // category and tags, so the lighter Classify pass can be skipped.
 func classificationComplete(enrichment domain.BookmarkEnrichment) bool {
 	return enrichment.Category != "" && enrichment.Category != "other" && len(enrichment.Tags) >= 2
+}
+
+func titleSourceForClassification(rawURL, title string) string {
+	title = strings.TrimSpace(title)
+	if title == "" {
+		return "unknown"
+	}
+
+	if hint, ok := pagemeta.TitleHintFromURL(rawURL); ok && strings.EqualFold(title, strings.TrimSpace(hint)) {
+		return "url_slug"
+	}
+
+	if strings.HasPrefix(title, "http://") || strings.HasPrefix(title, "https://") {
+		return "url"
+	}
+
+	return "metadata_or_user"
 }
 
 func contentOnlyEnrichment(enrichment domain.BookmarkEnrichment) domain.BookmarkEnrichment {

@@ -15,6 +15,6 @@ func enrichPrompt(pageURL string) string {
 	return fmt.Sprintf(enrichPromptTemplate, pageURL)
 }
 
-func classifyPrompt(pageURL, title, description string) string {
-	return fmt.Sprintf(classifyPromptTemplate, pageURL, title, description)
+func classifyPrompt(pageURL, title, description, titleSource string) string {
+	return fmt.Sprintf(classifyPromptTemplate, pageURL, title, description, titleSource)
 }

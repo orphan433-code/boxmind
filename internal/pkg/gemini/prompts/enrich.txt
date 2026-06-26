@@ -3,21 +3,36 @@ Analyze the webpage at this URL: %s
 Return ONLY valid JSON with exactly these fields: title, description, category, tags.
 
 If you CANNOT access or read the page (403, blocked, empty, error, paywall):
-- If the URL itself clearly identifies the content — derive title, category, tags from URL. Do NOT use the joke fallback.
-  hdrezka.co / hdrezka.ag / rezka.ag:
+Follow this priority order strictly:
+
+1) URL gives a readable signal — derive from URL, NEVER use joke fallback:
+  hdrezka.co / hdrezka.ag / rezka.ag with a readable slug in the path:
     /films/ -> category: movies, first tag: фильм
     /series/ -> category: movies, first tag: сериал
-    genre folder in path (fiction, thriller, horrors, dramas, comedies, anime, ...) -> second tag (фантастика, триллер, ужасы, драма, комедия, аниме, ...)
-    title from slug: drop numeric id prefix, drop -latest and year suffix, decode translit to readable title
+    genre folder in path (fiction, thriller, horrors, dramas, comedies, anime, ...) -> second tag
+    title from slug: drop numeric id prefix, drop -latest and year suffix, decode translit to proper Russian
     e.g. .../films/fiction/82305-mandalorec-i-grogu-2026-latest.html
       -> title: "Мандалорец и Гроугу", category: movies, tags: ["фильм", "фантастика"]
-- Only if URL gives no clue — use unavailable fallback:
-- Do NOT invent or guess content from thin air. Never hallucinate title, plot, or tags.
-- Use a playful, light tone in Russian — as if the page "refused" to open.
-- title: short funny line, e.g. "Сайт не в настроении", "Страница закрылась", "Тут закрыто"
-- description: one witty sentence, e.g. "Не пустили — сохранил ссылку, загляни сам." or "Страница стесняется, содержимое не показала."
-- category: other
-- tags: ["ссылка", "недоступно"]
+  Any other site with a readable slug (words separated by dashes, meaningful path segments):
+    derive title from slug, pick best category/tags from path keywords.
+  Do NOT invent plot details you cannot know — write a neutral description from genre/type if needed.
+
+2) URL is opaque but NOT a random hash (e.g. rezka.ag/film_2910, numeric-only IDs, short product codes):
+  Do NOT use joke fallback. Do NOT guess a specific title or plot.
+  title: short neutral label ("Ссылка" or domain name)
+  description: "Страница недоступна — сохранил ссылку для просмотра позже."
+  category: other
+  tags: ["ссылка", "недоступно"]
+
+3) URL is a meaningless random hash ONLY (e.g. t.me/j8f93ha, bit.ly/x7k2, paths with no readable words):
+  Use joke unavailable fallback as last resort:
+  title: short funny line, e.g. "Сайт не в настроении", "Страница закрылась"
+  description: one witty sentence, e.g. "Не пустили — сохранил ссылку, загляни сам."
+  category: other
+  tags: ["ссылка", "недоступно"]
+
+Never mix joke titles with real content titles in the same response style.
+Do NOT invent or guess content from thin air when URL gives no clue.
 
 Only use real content when you actually read the page, or when deriving from URL using the rules above.
 
@@ -35,6 +50,7 @@ Title language policy (IMPORTANT — do not translate by default):
   pick the Russian one and drop the duplicate. This is SELECTION, not translation.
 - ONLY rewrite the title when it is clearly broken:
   - a transliteration of Russian (Latin letters spelling Russian words) — e.g. "Vse Chto Ty Lyubish" -> "Всё, что ты любишь"
+    More examples: "Garri Potter и Uznik Azkabana" -> "Гарри Поттер и узник Азкабана"; "Mandalorec и Grogu" -> "Мандалорец и Грогу".
   - SEO junk ("смотреть онлайн", "watch online", "free", site name)
   - a raw URL or slug instead of a real name
   - "- YouTube" or a similar placeholder
@@ -44,7 +60,8 @@ Title language policy (IMPORTANT — do not translate by default):
 Description rules:
 - ALWAYS write the description in Russian, no matter what language the page or title is in.
 - Read the page synopsis/plot, then write YOUR OWN ultra-short summary in Russian.
-- Exactly ONE complete sentence, max 90 characters (hard limit). Shorter is better.
+- Exactly ONE complete sentence, max 10-12 words. Shorter is better.
+- Do not count characters — LLMs are bad at char limits; count words instead.
 - Keep it brief — describe the gist, not every plot detail. Stop early instead of listing.
 - Must end naturally with . ! or ? — never a run-on, never cut mid-phrase.
 - Do NOT copy long text from the page. Compress the idea into a few words.
@@ -57,6 +74,22 @@ Category rules:
   programming, design, news, gaming, movies, shopping, articles, learning, music, tools, entertainment, other
 
 Classification algorithm (FOLLOW IN THIS ORDER — main rule):
+
+Platform overrides (apply BEFORE Step 1 — these beat generic "watch video" rules):
+
+youtube.com / youtu.be — decide by TITLE and content type, NOT by domain alone:
+  course / урок / лекция / "полный курс" / tutorial / how-to / "для начинающих" -> learning
+    tags: [курс|урок|туториал, topic] — e.g. ["курс", "golang"]
+  gameplay / match / esports / funny gaming video / "катка" / CS2/CS:GO -> gaming
+    tags: [геймплей|обзор|киберспорт, game] — e.g. ["геймплей", "cs2"]
+  film / series / anime / vlog / documentary / interview / politics -> movies or entertainment
+    tags: [фильм|сериал|аниме|видео, genre/topic]
+  NEVER: treat all YouTube as entertainment.
+  NEVER: course -> programming (action is study -> learning).
+  NEVER: pick news/articles just because topic is political — user watches, not reads.
+  e.g. "Полный курс по Golang" -> learning, tags: ["курс", "golang"]
+  e.g. "Мясник vs киберспортсмен CS2" -> gaming, tags: ["геймплей", "cs2"]
+  e.g. political YouTube video -> entertainment, tags: ["видео", "политика"]
 
 Step 1 — What does the USER DO on this page? Category = action/format, NOT topic.
   WATCH video (film, series, anime, vlog, documentary, interview, clip) -> movies or entertainment
@@ -80,13 +113,11 @@ Common mistakes to avoid:
   WRONG: film or anime topic -> articles (when user WATCHES on a streaming page)
   RIGHT: watch anime -> movies, tags: ["аниме", "фэнтези"]
 
-Same platform — different categories (decide by Step 1, not by domain):
-  youtube.com + full course / урок / лекция -> learning
-  youtube.com + how-to tutorial -> learning
-  youtube.com + film / vlog / documentary / politics / interview -> entertainment or movies
+Same platform — different categories (decide by content, not by domain alone):
   bbc.com + text article -> news
   go.dev/doc -> programming
   leetcode.com/u/<user> or github.com/<user> profile -> programming
+  (YouTube rules are in Platform overrides above — apply those first)
 
 Page type details:
 - movies -> ONLY pages where the user WATCHES video: streaming, online cinema, video player, watch episode.
@@ -186,7 +217,7 @@ Known sites (apply when URL matches — same rules every time):
   boom.ru, zvuk.com, vk.com/audio:
   category: music
   tags: [трек|песня|альбом|плейлист, genre] — e.g. ["трек", "рок"], ["альбом", "инди"]
-  NEVER: learning, ноты, entertainment as category
+  category must be music — not learning, not entertainment
 - song download / mp3 pages (any domain):
   category: music
   first tag: песня or трек
@@ -196,14 +227,7 @@ Known sites (apply when URL matches — same rules every time):
 - leetcode.com, github.com (profile pages):
   category: programming
   tags: ["профиль", "программирование"]
-- youtube.com / youtu.be (always apply Step 1 first — learning and watch both exist on YouTube):
-  course / урок / лекция / "полный курс" / tutorial playlist -> learning (tags: курс|урок|туториал, topic)
-  step-by-step how-to video -> learning, tags: ["туториал", topic]
-  film / series / anime / vlog / documentary / interview / politics / news topic -> movies or entertainment
-  e.g. "Полный курс по Golang" -> learning, tags: ["курс", "golang"]
-  e.g. political YouTube video -> entertainment, tags: ["видео", "политика"]
-  NEVER pick news or articles just because topic is political — user watches, not reads
-  NEVER programming for courses — topic can be golang, action is study -> learning
+- (YouTube: see Platform overrides above)
 
 Language summary (STRICT):
 - description: ALWAYS Russian.
