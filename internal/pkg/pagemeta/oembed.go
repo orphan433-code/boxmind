@@ -48,16 +48,28 @@ func youtubeOEmbed(ctx context.Context, client *http.Client, rawURL string) (Pag
 	}
 
 	endpoint := "https://www.youtube.com/oembed?format=json&url=" + url.QueryEscape(rawURL)
-	return fetchYouTubeOEmbedWithRetry(ctx, client, endpoint)
+	return fetchOEmbedWithRetry(ctx, client, endpoint)
 }
 
-func fetchYouTubeOEmbedWithRetry(ctx context.Context, client *http.Client, endpoint string) (Page, bool) {
+// tiktokOEmbed fetches caption/title, author and thumbnail via TikTok's public
+// oEmbed endpoint. Short links (vt.tiktok.com, vm.tiktok.com) are supported.
+func tiktokOEmbed(ctx context.Context, client *http.Client, rawURL string) (Page, bool) {
+	host, ok := normalizedHost(rawURL)
+	if !ok || !isTikTokHost(host) {
+		return Page{}, false
+	}
+
+	endpoint := "https://www.tiktok.com/oembed?url=" + url.QueryEscape(rawURL)
+	return fetchOEmbedWithRetry(ctx, client, endpoint)
+}
+
+func fetchOEmbedWithRetry(ctx context.Context, client *http.Client, endpoint string) (Page, bool) {
 	for attempt := 1; attempt <= oEmbedMaxAttempts; attempt++ {
 		if ctx.Err() != nil {
 			return Page{}, false
 		}
 
-		page, err := youtubeOEmbedOnce(ctx, client, endpoint)
+		page, err := oEmbedOnce(ctx, client, endpoint)
 		if err == nil {
 			return page, true
 		}
@@ -76,7 +88,7 @@ func fetchYouTubeOEmbedWithRetry(ctx context.Context, client *http.Client, endpo
 	return Page{}, false
 }
 
-func youtubeOEmbedOnce(ctx context.Context, client *http.Client, endpoint string) (Page, error) {
+func oEmbedOnce(ctx context.Context, client *http.Client, endpoint string) (Page, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
 		return Page{}, oEmbedError{cause: err}
@@ -108,8 +120,8 @@ func youtubeOEmbedOnce(ctx context.Context, client *http.Client, endpoint string
 		return Page{}, oEmbedError{status: http.StatusNoContent}
 	}
 
-	// Intentionally no description: the generic "video by <author>" line carries no
-	// meaning and pollutes classification. A real Russian summary is produced later by AI.
+	// Intentionally no description: generic "video by <author>" lines carry no
+	// meaning and pollute classification. A real summary is produced later by AI.
 	return Page{
 		Title:    title,
 		ImageURL: strings.TrimSpace(parsed.ThumbnailURL),

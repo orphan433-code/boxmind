@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func TestFetchYouTubeOEmbedWithRetry(t *testing.T) {
+func TestFetchOEmbedWithRetry(t *testing.T) {
 	var calls atomic.Int32
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch calls.Add(1) {
@@ -19,7 +19,7 @@ func TestFetchYouTubeOEmbedWithRetry(t *testing.T) {
 			http.Error(w, "busy", http.StatusServiceUnavailable)
 		default:
 			w.Header().Set("Content-Type", "application/json")
-			_, _ = w.Write([]byte(`{"title":"Оригинальный title","thumbnail_url":"https://i.ytimg.com/vi/abc/hqdefault.jpg"}`))
+			_, _ = w.Write([]byte(`{"title":"Оригинальный title","thumbnail_url":"https://example.com/thumb.jpg"}`))
 		}
 	}))
 	defer server.Close()
@@ -27,19 +27,22 @@ func TestFetchYouTubeOEmbedWithRetry(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	page, ok := fetchYouTubeOEmbedWithRetry(ctx, server.Client(), server.URL)
+	page, ok := fetchOEmbedWithRetry(ctx, server.Client(), server.URL)
 	if !ok {
 		t.Fatal("expected success after retries")
 	}
 	if page.Title != "Оригинальный title" {
 		t.Fatalf("unexpected title: %q", page.Title)
 	}
+	if page.ImageURL != "https://example.com/thumb.jpg" {
+		t.Fatalf("unexpected thumbnail: %q", page.ImageURL)
+	}
 	if calls.Load() != 3 {
 		t.Fatalf("expected 3 calls, got %d", calls.Load())
 	}
 }
 
-func TestFetchYouTubeOEmbedWithRetryDoesNotRetry404(t *testing.T) {
+func TestFetchOEmbedWithRetryDoesNotRetry404(t *testing.T) {
 	var calls atomic.Int32
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		calls.Add(1)
@@ -47,12 +50,42 @@ func TestFetchYouTubeOEmbedWithRetryDoesNotRetry404(t *testing.T) {
 	}))
 	defer server.Close()
 
-	page, ok := fetchYouTubeOEmbedWithRetry(context.Background(), server.Client(), server.URL)
+	page, ok := fetchOEmbedWithRetry(context.Background(), server.Client(), server.URL)
 	if ok {
 		t.Fatalf("expected failure, got page %+v", page)
 	}
 	if calls.Load() != 1 {
 		t.Fatalf("expected single call, got %d", calls.Load())
+	}
+}
+
+func TestTikTokOEmbedIgnoresNonTikTok(t *testing.T) {
+	page, ok := tiktokOEmbed(context.Background(), http.DefaultClient, "https://example.com/video")
+	if ok {
+		t.Fatalf("expected false for non-tiktok url, got %+v", page)
+	}
+}
+
+func TestTikTokOEmbedParsesCaption(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{
+			"title":"Как настроить Xcode за 30 секунд",
+			"author_name":"devtips",
+			"thumbnail_url":"https://p16-sign.tiktokcdn.com/thumb.jpg"
+		}`))
+	}))
+	defer server.Close()
+
+	page, err := oEmbedOnce(context.Background(), server.Client(), server.URL)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if page.Title != "Как настроить Xcode за 30 секунд" {
+		t.Fatalf("unexpected title: %q", page.Title)
+	}
+	if page.ImageURL != "https://p16-sign.tiktokcdn.com/thumb.jpg" {
+		t.Fatalf("unexpected thumbnail: %q", page.ImageURL)
 	}
 }
 
