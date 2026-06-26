@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -54,7 +55,7 @@ func (e *Enricher) Enrich(ctx context.Context, pageURL string) (domain.BookmarkE
 	var last domain.BookmarkEnrichment
 
 	for attempt := 1; attempt <= maxUnavailableAttempts; attempt++ {
-		enrichment, err := e.generateEnrichment(ctx, prompt, config)
+		enrichment, err := e.generateEnrichment(ctx, "enrich", pageURL, prompt, config)
 		if err != nil {
 			return domain.BookmarkEnrichment{}, err
 		}
@@ -79,7 +80,7 @@ func (e *Enricher) Enrich(ctx context.Context, pageURL string) (domain.BookmarkE
 	return last, nil
 }
 
-func (e *Enricher) generateEnrichment(ctx context.Context, prompt string, config *genai.GenerateContentConfig) (domain.BookmarkEnrichment, error) {
+func (e *Enricher) generateEnrichment(ctx context.Context, operation, pageURL, prompt string, config *genai.GenerateContentConfig) (domain.BookmarkEnrichment, error) {
 	const maxAttempts = 3
 	var resp *genai.GenerateContentResponse
 	var err error
@@ -87,6 +88,7 @@ func (e *Enricher) generateEnrichment(ctx context.Context, prompt string, config
 	for attempt := 1; attempt <= maxAttempts; attempt++ {
 		resp, err = e.client.Models.GenerateContent(ctx, e.model, genai.Text(prompt), config)
 		if err == nil {
+			logTokenUsage(operation, e.model, pageURL, attempt, resp)
 			break
 		}
 		if !isRetryable(err) || attempt == maxAttempts {
@@ -183,4 +185,30 @@ func isRetryable(err error) bool {
 		strings.Contains(msg, "unavailable") ||
 		strings.Contains(msg, "high demand") ||
 		strings.Contains(msg, "resource_exhausted")
+}
+
+func logTokenUsage(operation, model, pageURL string, attempt int, resp *genai.GenerateContentResponse) {
+	if resp == nil {
+		log.Printf("[GEMINI-TOKEN] op=%s model=%s url=%s attempt=%d usage=unavailable", operation, model, pageURL, attempt)
+		return
+	}
+
+	usage := resp.UsageMetadata
+	if usage == nil {
+		log.Printf("[GEMINI-TOKEN] op=%s model=%s url=%s attempt=%d usage=empty", operation, model, pageURL, attempt)
+		return
+	}
+
+	log.Printf(
+		"[GEMINI-TOKEN] op=%s model=%s url=%s attempt=%d prompt=%d tool=%d output=%d thoughts=%d total=%d",
+		operation,
+		model,
+		pageURL,
+		attempt,
+		usage.PromptTokenCount,
+		usage.ToolUsePromptTokenCount,
+		usage.CandidatesTokenCount,
+		usage.ThoughtsTokenCount,
+		usage.TotalTokenCount,
+	)
 }

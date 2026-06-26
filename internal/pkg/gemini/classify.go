@@ -26,7 +26,7 @@ func (e *Enricher) Classify(ctx context.Context, pageURL, title, description, ti
 		Temperature: genai.Ptr(float32(0.1)),
 	}
 
-	return e.generateEnrichment(ctx, prompt, config)
+	return e.generateEnrichment(ctx, "classify", pageURL, prompt, config)
 }
 
 func cleanHint(value string) string {
