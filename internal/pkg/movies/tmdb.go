@@ -42,6 +42,10 @@ func NewTMDBProvider(apiKey string) *TMDBProvider {
 }
 
 func (p *TMDBProvider) Lookup(ctx context.Context, query domain.MovieMetadataQuery) (domain.MovieMetadata, bool) {
+	if p == nil || p.client == nil {
+		return domain.MovieMetadata{}, false
+	}
+
 	title := cleanMovieQuery(query.Title)
 	if title == "" {
 		return domain.MovieMetadata{}, false

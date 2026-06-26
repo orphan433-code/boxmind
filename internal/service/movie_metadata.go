@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -13,13 +14,28 @@ import (
 	"pet-link/internal/pkg/gemini"
 )
 
+// isNilProvider guards against a typed-nil interface (e.g. a nil *TMDBProvider
+// wrapped in a non-nil MovieMetadataProvider interface).
+func isNilProvider(p MovieMetadataProvider) bool {
+	if p == nil {
+		return true
+	}
+	value := reflect.ValueOf(p)
+	switch value.Kind() {
+	case reflect.Ptr, reflect.Interface, reflect.Map, reflect.Slice, reflect.Chan, reflect.Func:
+		return value.IsNil()
+	default:
+		return false
+	}
+}
+
 var (
 	movieTitleNoise = regexp.MustCompile(`(?i)(смотреть\s+онлайн|скачать\s+бесплатно|скачать|бесплатно|без\s+регистрации|watch\s+online|free|1080p|720p|hd)`)
 	yearPattern     = regexp.MustCompile(`\b(19\d{2}|20\d{2})\b`)
 )
 
 func (s *bookmarkService) applyMovieMetadataIfNeeded(ctx context.Context, userID, bookmarkID, rawURL string, enrichment domain.BookmarkEnrichment) domain.BookmarkEnrichment {
-	if s.movieMeta == nil {
+	if isNilProvider(s.movieMeta) {
 		return enrichment
 	}
 

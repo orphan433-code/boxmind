@@ -53,7 +53,13 @@ func main() {
 	}
 	imageFetcher := pagemeta.NewImageFetcher(pagemeta.NewImageHTTPExtractor())
 	metaFallback := pagemeta.NewMetaFallback(pagemeta.NewHTTPExtractor())
-	movieMetadata := movies.NewTMDBProvider(cfg.TMDBAPIKey)
+	var movieMetadata service.MovieMetadataProvider
+	if provider := movies.NewTMDBProvider(cfg.TMDBAPIKey); provider != nil {
+		movieMetadata = provider
+		log.Println("movie metadata: tmdb enabled")
+	} else {
+		log.Println("movie metadata: disabled (no TMDB_API_KEY)")
+	}
 	bookmarkService := service.NewBookmarkServiceWithCacheAndMovie(bookmarkRepo, cacheRepo, geminiEnricher, imageFetcher, metaFallback, movieMetadata)
 	bookmarkHandler := handler.NewBookmarkHandler(bookmarkService)
 
