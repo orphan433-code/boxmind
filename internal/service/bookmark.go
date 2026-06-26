@@ -237,6 +237,15 @@ func (s *bookmarkService) enrichAsync(userID, bookmarkID, rawURL string) {
 			return
 		}
 
+		// Stage 0: cheap Classify when title/metadata is already good (YouTube oEmbed, URL slug, etc.).
+		classifyFirstCtx, classifyFirstCancel := context.WithTimeout(context.Background(), enrichFinalizeTimeout)
+		var classifyDone bool
+		hints, classifyDone = s.runClassifyFirst(classifyFirstCtx, userID, bookmarkID, rawURL, hints)
+		classifyFirstCancel()
+		if classifyDone {
+			return
+		}
+
 		// Stage 1: page-reading Enrich with retries, on its own time budget.
 		hints, done := s.runEnrichLoop(userID, bookmarkID, rawURL, hints)
 		if done {
