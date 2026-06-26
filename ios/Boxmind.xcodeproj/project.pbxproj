@@ -1,0 +1,664 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		06F0F221474BC0F73D0F8081 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7277041180C9736EF2E2A5 /* APIClient.swift */; };
+		080771F7BC2B0700167F3926 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E70AE1D9FAD0F80A9B2D9FBE /* LoginView.swift */; };
+		196D8627FA128E942F7B48A8 /* EnrichmentState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529C38C3F88403E0FBDA556B /* EnrichmentState.swift */; };
+		239390380E7BDD9694BA386D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 62826C0270DEB0E47C18DEAC /* Assets.xcassets */; };
+		2CD9E96838F2921C22798492 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8BB088D6EE5D15A8CBBDF9D /* KeychainStore.swift */; };
+		3A460F922AC99A2738590E8A /* CategoryLabels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7AFD215BC1C18D3DAB88339 /* CategoryLabels.swift */; };
+		44C08382DEF692FFFD3F75E5 /* BookmarksViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7952E9E4D969A9CED7A57A5D /* BookmarksViewModel.swift */; };
+		46AA7928D7D8A8CA279D590E /* AuthModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942014E49A745F669E340A2 /* AuthModels.swift */; };
+		4A3F73C6FD46C4A38E33DB5C /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B00A4400AD35D425F4AB374 /* User.swift */; };
+		538CFD37946FF32428EBFF90 /* AddBookmarkSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6060081B181A2CF9DD15B65D /* AddBookmarkSheet.swift */; };
+		545CE4F74D30AC45FC5B614F /* AppGroupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA87379A45C3894AE558896E /* AppGroupStore.swift */; };
+		651B38CB5A6A614F092F10B5 /* BoxmindShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 050F7E3E207CD55BDAED5055 /* BoxmindShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		709D75D5D4C301D04D3C621F /* CategoryBookmarksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC1D7A53CCCB3A3A97B77F9B /* CategoryBookmarksView.swift */; };
+		72A892BB8508C89FC8E83FFC /* Bookmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6371CE009A560FE5D163FBAC /* Bookmark.swift */; };
+		79E6ACE6A501E68D95277A50 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAAEAA184095C1F7F62DE604 /* ShareViewController.swift */; };
+		83C2F5F0B9ADEC0524849C12 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F064CE856E889024B78B607B /* HomeView.swift */; };
+		88B3EC7910C38BF396C8E870 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98BDA03F261743481EF10EDB /* LoginViewModel.swift */; };
+		9241E960307A4D0021B83480 /* CategoriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E99720078333C611C7EB8B8 /* CategoriesView.swift */; };
+		93F1157E9E1D0636A7563F6F /* BoxmindApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E22C59E5AAFA121EA63D1E66 /* BoxmindApp.swift */; };
+		A8B4B855C73BEB03E6389A03 /* APIConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D9B0ECB212AA7BBBB9CEA8C /* APIConfig.swift */; };
+		AED5A8D041B064EED7C25A6D /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24B05689DB2DDE35CC4D7327 /* SessionStore.swift */; };
+		B27906CD10758A496C570EAE /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3AC5DC983C9B0BF5A71BB25 /* RootView.swift */; };
+		C805A92B434C3FA10D688170 /* AppGroupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA87379A45C3894AE558896E /* AppGroupStore.swift */; };
+		D0C53803081045450896CFB1 /* BookmarkRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F994AACD3913DA0D230BA613 /* BookmarkRowView.swift */; };
+		D1247AACDE9448238AFE5683 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6B46A4BAE79207121250DBE /* MainTabView.swift */; };
+		DE827712433DF67EE5B9EB5A /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B97296C5DA67F850C6760F71 /* APIError.swift */; };
+		E1F4D00E6F03DEBA3980D351 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF22FE39E021E97E4F49FD34 /* AccountView.swift */; };
+		F0050FC53568775FBD2C5BF0 /* BookmarkListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5AE3380A4CE2EE2C03BB5A8 /* BookmarkListView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		49105B25E938B8999949204C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 17DC1C4F6B61440390BEB9F0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F824C87F9870A6EB29FD1B2D;
+			remoteInfo = BoxmindShare;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F1059B7B08CA67B33E2B2647 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				651B38CB5A6A614F092F10B5 /* BoxmindShare.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		050F7E3E207CD55BDAED5055 /* BoxmindShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BoxmindShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		0BB79E7994EA6756C96553E8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		0E99720078333C611C7EB8B8 /* CategoriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoriesView.swift; sourceTree = "<group>"; };
+		24B05689DB2DDE35CC4D7327 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
+		2C7277041180C9736EF2E2A5 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		2D9B0ECB212AA7BBBB9CEA8C /* APIConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIConfig.swift; sourceTree = "<group>"; };
+		4BF90ECE4CBD6D9EB9040894 /* Boxmind.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Boxmind.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		529C38C3F88403E0FBDA556B /* EnrichmentState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnrichmentState.swift; sourceTree = "<group>"; };
+		6060081B181A2CF9DD15B65D /* AddBookmarkSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddBookmarkSheet.swift; sourceTree = "<group>"; };
+		62826C0270DEB0E47C18DEAC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		6371CE009A560FE5D163FBAC /* Bookmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bookmark.swift; sourceTree = "<group>"; };
+		7952E9E4D969A9CED7A57A5D /* BookmarksViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarksViewModel.swift; sourceTree = "<group>"; };
+		98BDA03F261743481EF10EDB /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
+		9B00A4400AD35D425F4AB374 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		A8BB088D6EE5D15A8CBBDF9D /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
+		AA87379A45C3894AE558896E /* AppGroupStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupStore.swift; sourceTree = "<group>"; };
+		B97296C5DA67F850C6760F71 /* APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIError.swift; sourceTree = "<group>"; };
+		BAAEAA184095C1F7F62DE604 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		BF22FE39E021E97E4F49FD34 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
+		C942014E49A745F669E340A2 /* AuthModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthModels.swift; sourceTree = "<group>"; };
+		E19692AD25BD196A27FB605D /* BoxmindShare.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BoxmindShare.entitlements; sourceTree = "<group>"; };
+		E22C59E5AAFA121EA63D1E66 /* BoxmindApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoxmindApp.swift; sourceTree = "<group>"; };
+		E3AC5DC983C9B0BF5A71BB25 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		E5AE3380A4CE2EE2C03BB5A8 /* BookmarkListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkListView.swift; sourceTree = "<group>"; };
+		E6B46A4BAE79207121250DBE /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		E70AE1D9FAD0F80A9B2D9FBE /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		EC1D7A53CCCB3A3A97B77F9B /* CategoryBookmarksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBookmarksView.swift; sourceTree = "<group>"; };
+		F064CE856E889024B78B607B /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		F7AFD215BC1C18D3DAB88339 /* CategoryLabels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryLabels.swift; sourceTree = "<group>"; };
+		F8F599318E4848096E19A484 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		F994AACD3913DA0D230BA613 /* BookmarkRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkRowView.swift; sourceTree = "<group>"; };
+		FA6C5FCE81C4398F12552AA4 /* Boxmind.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Boxmind.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0C335AB4DC6DB4BDB78F60DE /* Bookmarks */ = {
+			isa = PBXGroup;
+			children = (
+				6060081B181A2CF9DD15B65D /* AddBookmarkSheet.swift */,
+				E5AE3380A4CE2EE2C03BB5A8 /* BookmarkListView.swift */,
+				F994AACD3913DA0D230BA613 /* BookmarkRowView.swift */,
+				7952E9E4D969A9CED7A57A5D /* BookmarksViewModel.swift */,
+			);
+			path = Bookmarks;
+			sourceTree = "<group>";
+		};
+		1168F9F14B3002A910401AC8 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				F064CE856E889024B78B607B /* HomeView.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		1C8D54AFC4547D2108DD7592 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				E70AE1D9FAD0F80A9B2D9FBE /* LoginView.swift */,
+				98BDA03F261743481EF10EDB /* LoginViewModel.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		1E4328DDE63DA96AD5E8807D /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				2D9B0ECB212AA7BBBB9CEA8C /* APIConfig.swift */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		217DB76C46E4126EE76F3C64 = {
+			isa = PBXGroup;
+			children = (
+				390C9B1068B361C296A08019 /* Boxmind */,
+				83EF080A9FD3CE64CE099C1B /* BoxmindShare */,
+				5AFD2B210B17485153DD5B37 /* Shared */,
+				FB01AEC962387EED06637525 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		390C9B1068B361C296A08019 /* Boxmind */ = {
+			isa = PBXGroup;
+			children = (
+				8AF12DE522FE5746A9C555B7 /* App */,
+				B4EBCE7496A114F6DB9CD334 /* Core */,
+				396B4130E897B8EFFE9C4EEA /* Features */,
+				FC3D279448E2D02455FC73E9 /* Resources */,
+				97937854E1B404974D450FAE /* Shared */,
+			);
+			path = Boxmind;
+			sourceTree = "<group>";
+		};
+		396B4130E897B8EFFE9C4EEA /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				58748B33D1B890F3582DA2CA /* Account */,
+				1C8D54AFC4547D2108DD7592 /* Auth */,
+				0C335AB4DC6DB4BDB78F60DE /* Bookmarks */,
+				9F862A412A5035461280C316 /* Categories */,
+				1168F9F14B3002A910401AC8 /* Home */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		58748B33D1B890F3582DA2CA /* Account */ = {
+			isa = PBXGroup;
+			children = (
+				BF22FE39E021E97E4F49FD34 /* AccountView.swift */,
+			);
+			path = Account;
+			sourceTree = "<group>";
+		};
+		5A2F04811793A7F819FF0861 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				C942014E49A745F669E340A2 /* AuthModels.swift */,
+				6371CE009A560FE5D163FBAC /* Bookmark.swift */,
+				9B00A4400AD35D425F4AB374 /* User.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		5AFD2B210B17485153DD5B37 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				AA87379A45C3894AE558896E /* AppGroupStore.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		83EF080A9FD3CE64CE099C1B /* BoxmindShare */ = {
+			isa = PBXGroup;
+			children = (
+				BAAEAA184095C1F7F62DE604 /* ShareViewController.swift */,
+				C3D2F69A70E0AE6E372C537F /* Resources */,
+			);
+			path = BoxmindShare;
+			sourceTree = "<group>";
+		};
+		8AF12DE522FE5746A9C555B7 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				E22C59E5AAFA121EA63D1E66 /* BoxmindApp.swift */,
+				E6B46A4BAE79207121250DBE /* MainTabView.swift */,
+				E3AC5DC983C9B0BF5A71BB25 /* RootView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		97937854E1B404974D450FAE /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				F7AFD215BC1C18D3DAB88339 /* CategoryLabels.swift */,
+				529C38C3F88403E0FBDA556B /* EnrichmentState.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		9F862A412A5035461280C316 /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				0E99720078333C611C7EB8B8 /* CategoriesView.swift */,
+				EC1D7A53CCCB3A3A97B77F9B /* CategoryBookmarksView.swift */,
+			);
+			path = Categories;
+			sourceTree = "<group>";
+		};
+		AC1302B409DA16E14FB1151D /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				A8BB088D6EE5D15A8CBBDF9D /* KeychainStore.swift */,
+				24B05689DB2DDE35CC4D7327 /* SessionStore.swift */,
+			);
+			path = Storage;
+			sourceTree = "<group>";
+		};
+		B4EBCE7496A114F6DB9CD334 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				1E4328DDE63DA96AD5E8807D /* Config */,
+				5A2F04811793A7F819FF0861 /* Models */,
+				CC4527A98F8793753C5123BF /* Networking */,
+				AC1302B409DA16E14FB1151D /* Storage */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		C3D2F69A70E0AE6E372C537F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				E19692AD25BD196A27FB605D /* BoxmindShare.entitlements */,
+				0BB79E7994EA6756C96553E8 /* Info.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		CC4527A98F8793753C5123BF /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				2C7277041180C9736EF2E2A5 /* APIClient.swift */,
+				B97296C5DA67F850C6760F71 /* APIError.swift */,
+			);
+			path = Networking;
+			sourceTree = "<group>";
+		};
+		FB01AEC962387EED06637525 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4BF90ECE4CBD6D9EB9040894 /* Boxmind.app */,
+				050F7E3E207CD55BDAED5055 /* BoxmindShare.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		FC3D279448E2D02455FC73E9 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				62826C0270DEB0E47C18DEAC /* Assets.xcassets */,
+				FA6C5FCE81C4398F12552AA4 /* Boxmind.entitlements */,
+				F8F599318E4848096E19A484 /* Info.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		715FB31A05910813AC752D83 /* Boxmind */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C997FF7D5BFAEE7777ECBED3 /* Build configuration list for PBXNativeTarget "Boxmind" */;
+			buildPhases = (
+				0AE4BF68489F6F770AAFB1D6 /* Sources */,
+				2DD23118B9CF7FBA8E03B1C6 /* Resources */,
+				F1059B7B08CA67B33E2B2647 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D521E49880B44CAEFA9D61C2 /* PBXTargetDependency */,
+			);
+			name = Boxmind;
+			packageProductDependencies = (
+			);
+			productName = Boxmind;
+			productReference = 4BF90ECE4CBD6D9EB9040894 /* Boxmind.app */;
+			productType = "com.apple.product-type.application";
+		};
+		F824C87F9870A6EB29FD1B2D /* BoxmindShare */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3D7AC50BA96AF4A530D1B86B /* Build configuration list for PBXNativeTarget "BoxmindShare" */;
+			buildPhases = (
+				2094DA08255C9584439A8526 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BoxmindShare;
+			packageProductDependencies = (
+			);
+			productName = BoxmindShare;
+			productReference = 050F7E3E207CD55BDAED5055 /* BoxmindShare.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		17DC1C4F6B61440390BEB9F0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					715FB31A05910813AC752D83 = {
+						ProvisioningStyle = Automatic;
+					};
+					F824C87F9870A6EB29FD1B2D = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 531281EE757C79A3C8AE5528 /* Build configuration list for PBXProject "Boxmind" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 217DB76C46E4126EE76F3C64;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = FB01AEC962387EED06637525 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				715FB31A05910813AC752D83 /* Boxmind */,
+				F824C87F9870A6EB29FD1B2D /* BoxmindShare */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		2DD23118B9CF7FBA8E03B1C6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				239390380E7BDD9694BA386D /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0AE4BF68489F6F770AAFB1D6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				06F0F221474BC0F73D0F8081 /* APIClient.swift in Sources */,
+				A8B4B855C73BEB03E6389A03 /* APIConfig.swift in Sources */,
+				DE827712433DF67EE5B9EB5A /* APIError.swift in Sources */,
+				E1F4D00E6F03DEBA3980D351 /* AccountView.swift in Sources */,
+				538CFD37946FF32428EBFF90 /* AddBookmarkSheet.swift in Sources */,
+				545CE4F74D30AC45FC5B614F /* AppGroupStore.swift in Sources */,
+				46AA7928D7D8A8CA279D590E /* AuthModels.swift in Sources */,
+				72A892BB8508C89FC8E83FFC /* Bookmark.swift in Sources */,
+				F0050FC53568775FBD2C5BF0 /* BookmarkListView.swift in Sources */,
+				D0C53803081045450896CFB1 /* BookmarkRowView.swift in Sources */,
+				44C08382DEF692FFFD3F75E5 /* BookmarksViewModel.swift in Sources */,
+				93F1157E9E1D0636A7563F6F /* BoxmindApp.swift in Sources */,
+				9241E960307A4D0021B83480 /* CategoriesView.swift in Sources */,
+				709D75D5D4C301D04D3C621F /* CategoryBookmarksView.swift in Sources */,
+				3A460F922AC99A2738590E8A /* CategoryLabels.swift in Sources */,
+				196D8627FA128E942F7B48A8 /* EnrichmentState.swift in Sources */,
+				83C2F5F0B9ADEC0524849C12 /* HomeView.swift in Sources */,
+				2CD9E96838F2921C22798492 /* KeychainStore.swift in Sources */,
+				080771F7BC2B0700167F3926 /* LoginView.swift in Sources */,
+				88B3EC7910C38BF396C8E870 /* LoginViewModel.swift in Sources */,
+				D1247AACDE9448238AFE5683 /* MainTabView.swift in Sources */,
+				B27906CD10758A496C570EAE /* RootView.swift in Sources */,
+				AED5A8D041B064EED7C25A6D /* SessionStore.swift in Sources */,
+				4A3F73C6FD46C4A38E33DB5C /* User.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2094DA08255C9584439A8526 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C805A92B434C3FA10D688170 /* AppGroupStore.swift in Sources */,
+				79E6ACE6A501E68D95277A50 /* ShareViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D521E49880B44CAEFA9D61C2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F824C87F9870A6EB29FD1B2D /* BoxmindShare */;
+			targetProxy = 49105B25E938B8999949204C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		00879BEF8C9198247419042A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Boxmind/Resources/Boxmind.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = ASYB7Y6H57;
+				INFOPLIST_FILE = Boxmind/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = link.boxmind.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		0C0222D27D8DBF4D5BDD59C3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Boxmind/Resources/Boxmind.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = ASYB7Y6H57;
+				INFOPLIST_FILE = Boxmind/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = link.boxmind.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		42663E876FF94C277E74571C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		9E88881646DAD01D40A0C8EA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		C50B91706553201FF74E2389 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = BoxmindShare/Resources/BoxmindShare.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = ASYB7Y6H57;
+				INFOPLIST_FILE = BoxmindShare/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = link.boxmind.app.share;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		E30FB21D1A7950F375F194E0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = BoxmindShare/Resources/BoxmindShare.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = ASYB7Y6H57;
+				INFOPLIST_FILE = BoxmindShare/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = link.boxmind.app.share;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3D7AC50BA96AF4A530D1B86B /* Build configuration list for PBXNativeTarget "BoxmindShare" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E30FB21D1A7950F375F194E0 /* Debug */,
+				C50B91706553201FF74E2389 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		531281EE757C79A3C8AE5528 /* Build configuration list for PBXProject "Boxmind" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				42663E876FF94C277E74571C /* Debug */,
+				9E88881646DAD01D40A0C8EA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C997FF7D5BFAEE7777ECBED3 /* Build configuration list for PBXNativeTarget "Boxmind" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				00879BEF8C9198247419042A /* Debug */,
+				0C0222D27D8DBF4D5BDD59C3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 17DC1C4F6B61440390BEB9F0 /* Project object */;
+}

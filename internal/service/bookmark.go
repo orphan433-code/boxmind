@@ -246,7 +246,7 @@ func (s *bookmarkService) runEnrichLoop(userID, bookmarkID, rawURL string, hints
 		if err == nil && !gemini.IsUnavailableEnrichment(enrichment) {
 			finished := s.finishEnrichment(ctx, rawURL, hints, enrichment)
 			imageURL := s.bookmarkImageURL(ctx, userID, bookmarkID)
-			s.tryPersistEnrichment(ctx, userID, bookmarkID, finished)
+			s.tryPersistEnrichment(ctx, userID, bookmarkID, rawURL, finished)
 			if cardquality.IsGoodEnough(finished, imageURL) {
 				return finished, true
 			}
@@ -302,7 +302,7 @@ func (s *bookmarkService) finalizeEnrichment(ctx context.Context, userID, bookma
 	merged = s.classifyAndMerge(ctx, rawURL, merged)
 
 	imageURL := s.bookmarkImageURL(ctx, userID, bookmarkID)
-	s.tryPersistEnrichment(ctx, userID, bookmarkID, merged)
+	s.tryPersistEnrichment(ctx, userID, bookmarkID, rawURL, merged)
 
 	if !cardquality.IsAcceptable(merged, imageURL) {
 		log.Printf("bookmark enrich exhausted for %s", rawURL)
@@ -424,7 +424,8 @@ func contentOnlyEnrichment(enrichment domain.BookmarkEnrichment) domain.Bookmark
 	}
 }
 
-func (s *bookmarkService) tryPersistEnrichment(ctx context.Context, userID, bookmarkID string, enrichment domain.BookmarkEnrichment) bool {
+func (s *bookmarkService) tryPersistEnrichment(ctx context.Context, userID, bookmarkID, rawURL string, enrichment domain.BookmarkEnrichment) bool {
+	enrichment.Tags = pagemeta.EnsurePlatformTag(rawURL, enrichment.Tags)
 	if err := s.persistEnrichment(ctx, userID, bookmarkID, enrichment); err != nil {
 		if errors.Is(err, domain.ErrBookmarkNotFound) {
 			return true

@@ -1,0 +1,51 @@
+name: Boxmind
+options:
+  bundleIdPrefix: link.boxmind
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "15.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+
+targets:
+  Boxmind:
+    type: application
+    platform: iOS
+    sources:
+      - path: Boxmind
+      - path: Shared
+    dependencies:
+      - target: BoxmindShare
+        embed: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: link.boxmind.app
+        INFOPLIST_FILE: Boxmind/Resources/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Boxmind/Resources/Boxmind.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        TARGETED_DEVICE_FAMILY: "1,2"
+        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: 0.1.0
+    scheme:
+      testTargets: []
+      gatherCoverageData: false
+
+  BoxmindShare:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: BoxmindShare
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: link.boxmind.app.share
+        INFOPLIST_FILE: BoxmindShare/Resources/Info.plist
+        CODE_SIGN_ENTITLEMENTS: BoxmindShare/Resources/BoxmindShare.entitlements
+        TARGETED_DEVICE_FAMILY: "1,2"
+        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: 0.1.0
