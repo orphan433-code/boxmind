@@ -68,7 +68,9 @@ func TestEligibleForClassifyFirst(t *testing.T) {
 type classifyFirstEnricher struct {
 	classifyCalls int
 	enrichCalls   int
+	polishCalls   int
 	classified    domain.BookmarkEnrichment
+	polished      domain.BookmarkEnrichment
 }
 
 func (m *classifyFirstEnricher) Enrich(_ context.Context, _ string) (domain.BookmarkEnrichment, error) {
@@ -79,6 +81,11 @@ func (m *classifyFirstEnricher) Enrich(_ context.Context, _ string) (domain.Book
 func (m *classifyFirstEnricher) Classify(_ context.Context, _, _, _, _ string) (domain.BookmarkEnrichment, error) {
 	m.classifyCalls++
 	return m.classified, nil
+}
+
+func (m *classifyFirstEnricher) Polish(_ context.Context, _ string, _ domain.BookmarkEnrichment) (domain.BookmarkEnrichment, error) {
+	m.polishCalls++
+	return m.polished, nil
 }
 
 type classifyFirstRepo struct {

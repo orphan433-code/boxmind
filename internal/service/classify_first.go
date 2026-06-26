@@ -44,6 +44,7 @@ func (s *bookmarkService) runClassifyFirst(
 	imageURL := s.bookmarkImageURL(ctx, userID, bookmarkID)
 	merged = s.applyMovieMetadataIfNeeded(ctx, userID, bookmarkID, rawURL, merged)
 	imageURL = s.bookmarkImageURL(ctx, userID, bookmarkID)
+	merged = s.applyTextPolishIfNeeded(ctx, rawURL, merged, imageURL)
 	s.tryPersistEnrichment(ctx, userID, bookmarkID, rawURL, merged)
 
 	if !cardquality.IsAcceptable(merged, imageURL) {

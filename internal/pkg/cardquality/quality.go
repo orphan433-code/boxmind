@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	minGoodScore     = 7
-	minAcceptScore   = 5
-	maxDescription   = 100
+	minGoodScore      = 7
+	minAcceptScore    = 5
+	maxDescription    = 100
 	targetDescription = 90
 )
 
@@ -21,6 +21,29 @@ var seoTitleMarkers = []string{
 	"watch online",
 	"— смотреть",
 	" - смотреть",
+	"скачать бесплатно",
+	"скачать",
+	"бесплатно",
+	"без регистрации",
+	"купить",
+	"цена",
+	"отзывы",
+	"топ ",
+	"лучшие ",
+}
+
+var weakDescriptionMarkers = []string{
+	"доступн",
+	"для просмотра онлайн",
+	"смотреть онлайн",
+	"фильм или сериал",
+	"видеоматериал от",
+	"известного российского медиахолдинга",
+	"с видео разборами",
+	"для начинающих и профессионалов",
+	"на нашем сайте",
+	"скачать бесплатно",
+	"можно скачать",
 }
 
 // Score estimates how complete and usable a bookmark card is.
@@ -68,33 +91,72 @@ func GoodTitle(title string) bool {
 	if title == "" {
 		return false
 	}
+	return !BadTitle(title)
+}
+
+func BadTitle(title string) bool {
+	title = pagemeta.CleanPageTitle(strings.TrimSpace(title))
+	if title == "" {
+		return true
+	}
 	if strings.HasPrefix(title, "http://") || strings.HasPrefix(title, "https://") {
-		return false
+		return true
 	}
 	lower := strings.ToLower(title)
 	for _, marker := range seoTitleMarkers {
 		if strings.Contains(lower, marker) {
-			return false
+			return true
 		}
 	}
-	return utf8.RuneCountInString(title) >= 2
+	runes := utf8.RuneCountInString(title)
+	return runes < 2 || runes > 70
 }
 
 func GoodDescription(description string) bool {
+	return !BadDescription(description, "")
+}
+
+func BadDescription(description, title string) bool {
 	description = strings.TrimSpace(description)
 	if description == "" {
-		return false
+		return true
 	}
 	if gemini.IsUnavailableEnrichment(domain.BookmarkEnrichment{Description: description}) {
-		return false
+		return true
 	}
 	if strings.HasSuffix(description, "…") {
-		return false
+		return true
 	}
 	if utf8.RuneCountInString(description) > maxDescription {
+		return true
+	}
+	lower := strings.ToLower(description)
+	for _, marker := range weakDescriptionMarkers {
+		if strings.Contains(lower, marker) {
+			return true
+		}
+	}
+	return repeatsTitle(description, title)
+}
+
+func NeedsPolish(e domain.BookmarkEnrichment, imageURL string) bool {
+	if strings.TrimSpace(e.Title) == "" && strings.TrimSpace(e.Description) == "" {
 		return false
 	}
-	return true
+	return BadTitle(e.Title) || BadDescription(e.Description, e.Title)
+}
+
+func repeatsTitle(description, title string) bool {
+	description = strings.ToLower(strings.TrimSpace(description))
+	title = strings.ToLower(pagemeta.CleanPageTitle(strings.TrimSpace(title)))
+	if description == "" || title == "" {
+		return false
+	}
+	title = strings.Trim(title, ".!?:;,-—– ")
+	if utf8.RuneCountInString(title) < 12 {
+		return false
+	}
+	return strings.Contains(description, title) || strings.Contains(title, strings.Trim(description, ".!?:;,-—– "))
 }
 
 // Merge combines enrichment layers without degrading a good card.

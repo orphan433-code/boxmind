@@ -1,12 +1,16 @@
 package pagemeta
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/cookiejar"
 	"strings"
 	"time"
+
+	"golang.org/x/net/html/charset"
 )
 
 const (
@@ -35,9 +39,11 @@ func NewImageHTTPExtractor() *HTTPExtractor {
 }
 
 func newHTTPExtractor(timeout time.Duration) *HTTPExtractor {
+	jar, _ := cookiejar.New(nil)
 	return &HTTPExtractor{
 		client: &http.Client{
 			Timeout: timeout,
+			Jar:     jar,
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {
 				if len(via) >= 5 {
 					return fmt.Errorf("too many redirects")
@@ -93,10 +99,28 @@ func (e *HTTPExtractor) Extract(ctx context.Context, rawURL string) (Page, error
 		return Page{}, fmt.Errorf("read page: %w", err)
 	}
 
+	body = decodeToUTF8(body, resp.Header.Get("Content-Type"))
+
 	page := parseHTML(body, parsedURL)
 	if page.Title == "" && page.Description == "" && page.ImageURL == "" {
 		return Page{}, fmt.Errorf("page metadata not found")
 	}
 
 	return page, nil
+}
+
+// decodeToUTF8 converts a page body to UTF-8 using the charset declared in the
+// Content-Type header, an HTML <meta> tag, or a BOM. Pages served in legacy
+// encodings (e.g. windows-1251) would otherwise yield invalid UTF-8 bytes that
+// break downstream UTF-8 storage.
+func decodeToUTF8(body []byte, contentType string) []byte {
+	reader, err := charset.NewReader(bytes.NewReader(body), contentType)
+	if err != nil {
+		return body
+	}
+	decoded, err := io.ReadAll(reader)
+	if err != nil {
+		return body
+	}
+	return decoded
 }

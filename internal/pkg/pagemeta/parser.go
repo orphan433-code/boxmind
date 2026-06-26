@@ -41,10 +41,16 @@ func parseHTML(html []byte, pageURL *url.URL) Page {
 	))
 
 	return Page{
-		Title:       title,
-		Description: description,
-		ImageURL:    resolveURL(pageURL, imageURL),
+		Title:       sanitizeUTF8(title),
+		Description: sanitizeUTF8(description),
+		ImageURL:    sanitizeUTF8(resolveURL(pageURL, imageURL)),
 	}
+}
+
+// sanitizeUTF8 drops invalid UTF-8 byte sequences so values are always safe to
+// store in UTF-8 columns, even when charset detection fails.
+func sanitizeUTF8(value string) string {
+	return strings.ToValidUTF8(value, "")
 }
 
 func jsonLDPage(doc *goquery.Document) Page {

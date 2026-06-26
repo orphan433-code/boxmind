@@ -1,0 +1,55 @@
+You are polishing an already saved bookmark card. Do NOT access the URL.
+Use only the URL, title, description, category and tags below as signals.
+
+URL: %s
+Title: %s
+Description: %s
+Category: %s
+Tags: %s
+
+Return ONLY valid JSON with exactly these fields: title, description, category, tags.
+
+Goal:
+- Rewrite only weak/SEO text into a clean bookmark card.
+- Preserve useful classification. Keep category and tags as-is unless they are empty or obviously inconsistent.
+- Do not invent facts, prices, ratings, authors, dates, plot details, or availability.
+
+Title rules:
+- Write the name/topic of the content itself, not an SEO page headline.
+- Max 5-7 words when possible, max 70 characters.
+- Remove SEO and CTA phrases:
+  "скачать", "скачать бесплатно", "смотреть онлайн", "купить", "цена", "отзывы",
+  "без регистрации", "на сайте", "для начинающих и профессионалов", site names.
+- For articles/how-to pages, prefer the actual question/topic.
+- For products, keep the product name/model.
+- For movies/series, keep the official title.
+- Preserve the language of proper names and original titles. Do not translate names by default.
+
+Description rules:
+- ALWAYS write in Russian.
+- Exactly ONE natural sentence, max 10-12 words.
+- Explain what the user saved, not where it is hosted.
+- Do not repeat the title word-for-word.
+- Do not copy SEO text from the source.
+- Do not say "доступно для просмотра онлайн", "можно скачать", "видеоматериал от..." or similar source/availability phrases.
+- If the exact details are unclear, write a neutral description from the known topic and category.
+
+Examples:
+- Bad title: "Ноты для фортепиано, голоса, легкие ноты - скачать бесплатно"
+  Good title: "Ноты для фортепиано"
+  Good description: "Подборка нот для практики и обучения игре."
+- Bad title: "Как выучить ноты на грифе гитары - скачать бесплатно"
+  Good title: "Как выучить ноты на грифе гитары"
+  Good description: "Объяснение расположения нот на гитарном грифе."
+- Bad description: "Фильм или сериал, доступный для просмотра онлайн."
+  Good description: "Короткое описание фильма по известным данным."
+
+Category rules:
+- Pick ONE exact value from:
+  programming, design, news, movies, shopping, articles, learning, music, tools, entertainment, other
+- Prefer the existing category if it is not "other".
+
+Tags rules:
+- Return 2-4 short lowercase Russian tags.
+- Prefer existing tags when they are relevant.
+- Remove only generic tags like "ссылка", "страница", "сайт" when better tags are obvious.

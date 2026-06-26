@@ -28,7 +28,7 @@ func isUsableCacheEntry(entry domain.URLEnrichmentCacheEntry) bool {
 	if gemini.IsUnavailableEnrichment(enrichment) {
 		return false
 	}
-	return cardquality.IsAcceptable(enrichment, entry.ImageURL)
+	return cardquality.IsAcceptable(enrichment, entry.ImageURL) && !cardquality.NeedsPolish(enrichment, entry.ImageURL)
 }
 
 func applyCacheToCreateInput(input *domain.CreateBookmarkInput, entry domain.URLEnrichmentCacheEntry) {

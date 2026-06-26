@@ -53,3 +53,38 @@ func TestIsGoodEnough(t *testing.T) {
 		t.Fatal("expected good enough card")
 	}
 }
+
+func TestNeedsPolishForSEOTitleAndWeakDescription(t *testing.T) {
+	e := domain.BookmarkEnrichment{
+		Title:       "Ноты для фортепиано, голоса, легкие ноты - скачать бесплатно",
+		Description: "Ноты для фортепиано скачать бесплатно, с видео разборами для начинающих и профессионалов.",
+		Category:    "learning",
+		Tags:        []string{"ноты", "фортепиано"},
+	}
+
+	if GoodTitle(e.Title) {
+		t.Fatal("expected SEO title to be bad")
+	}
+	if GoodDescription(e.Description) {
+		t.Fatal("expected weak SEO description to be bad")
+	}
+	if !NeedsPolish(e, "") {
+		t.Fatal("expected card to need polish")
+	}
+	if IsAcceptable(e, "") {
+		t.Fatal("expected weak text card to be unacceptable")
+	}
+}
+
+func TestNeedsPolishKeepsCleanCard(t *testing.T) {
+	e := domain.BookmarkEnrichment{
+		Title:       "Как выучить ноты на грифе гитары",
+		Description: "Краткое объяснение расположения нот на гитарном грифе.",
+		Category:    "learning",
+		Tags:        []string{"ноты", "гитара"},
+	}
+
+	if NeedsPolish(e, "") {
+		t.Fatal("expected clean card to skip polish")
+	}
+}

@@ -29,6 +29,7 @@ type BookmarkRepository interface {
 type BookmarkEnricher interface {
 	Enrich(ctx context.Context, rawURL string) (domain.BookmarkEnrichment, error)
 	Classify(ctx context.Context, pageURL, title, description, titleSource string) (domain.BookmarkEnrichment, error)
+	Polish(ctx context.Context, pageURL string, enrichment domain.BookmarkEnrichment) (domain.BookmarkEnrichment, error)
 }
 
 type BookmarkImageFetcher interface {
@@ -299,6 +300,7 @@ func (s *bookmarkService) runEnrichLoop(userID, bookmarkID, rawURL string, hints
 			imageURL := s.bookmarkImageURL(ctx, userID, bookmarkID)
 			finished = s.applyMovieMetadataIfNeeded(ctx, userID, bookmarkID, rawURL, finished)
 			imageURL = s.bookmarkImageURL(ctx, userID, bookmarkID)
+			finished = s.applyTextPolishIfNeeded(ctx, rawURL, finished, imageURL)
 			s.tryPersistEnrichment(ctx, userID, bookmarkID, rawURL, finished)
 			if cardquality.IsGoodEnough(finished, imageURL) {
 				return finished, true
@@ -357,6 +359,7 @@ func (s *bookmarkService) finalizeEnrichment(ctx context.Context, userID, bookma
 	imageURL := s.bookmarkImageURL(ctx, userID, bookmarkID)
 	merged = s.applyMovieMetadataIfNeeded(ctx, userID, bookmarkID, rawURL, merged)
 	imageURL = s.bookmarkImageURL(ctx, userID, bookmarkID)
+	merged = s.applyTextPolishIfNeeded(ctx, rawURL, merged, imageURL)
 	s.tryPersistEnrichment(ctx, userID, bookmarkID, rawURL, merged)
 
 	if !cardquality.IsAcceptable(merged, imageURL) {
@@ -393,6 +396,30 @@ func (s *bookmarkService) classifyAndMerge(ctx context.Context, rawURL string, b
 	return mergeClassifiedEnrichment(rawURL, base, classified)
 }
 
+func (s *bookmarkService) applyTextPolishIfNeeded(ctx context.Context, rawURL string, base domain.BookmarkEnrichment, imageURL string) domain.BookmarkEnrichment {
+	if s.enricher == nil || !cardquality.NeedsPolish(base, imageURL) {
+		return base
+	}
+
+	polishCtx, cancel := context.WithTimeout(ctx, enrichAttemptTimeout)
+	defer cancel()
+
+	polished, err := s.enricher.Polish(polishCtx, rawURL, base)
+	if err != nil {
+		log.Printf("[ENRICH-POLISH] failed url=%s err=%v", rawURL, err)
+		return base
+	}
+	if gemini.IsUnavailableEnrichment(polished) {
+		return base
+	}
+
+	merged := mergePolishedEnrichment(base, polished)
+	if merged.Title != base.Title || merged.Description != base.Description {
+		log.Printf("[ENRICH-POLISH] applied url=%s", rawURL)
+	}
+	return merged
+}
+
 func enrichmentFromBookmark(bookmark domain.Bookmark) domain.BookmarkEnrichment {
 	return domain.BookmarkEnrichment{
 		Title:       bookmark.Title,
@@ -418,6 +445,29 @@ func mergeClassifiedEnrichment(rawURL string, base, classified domain.BookmarkEn
 	}
 
 	return merged
+}
+
+func mergePolishedEnrichment(base, polished domain.BookmarkEnrichment) domain.BookmarkEnrichment {
+	normalized := gemini.NormalizeEnrichment(polished)
+	out := base
+
+	if normalized.Title != "" && cardquality.BadTitle(base.Title) && cardquality.GoodTitle(normalized.Title) {
+		out.Title = normalized.Title
+	}
+	if normalized.Description != "" &&
+		cardquality.BadDescription(base.Description, out.Title) &&
+		cardquality.GoodDescription(normalized.Description) &&
+		!cardquality.BadDescription(normalized.Description, out.Title) {
+		out.Description = normalized.Description
+	}
+	if (out.Category == "" || out.Category == "other") && normalized.Category != "" && normalized.Category != "other" {
+		out.Category = normalized.Category
+	}
+	if len(out.Tags) < 2 && len(normalized.Tags) >= 2 {
+		out.Tags = normalized.Tags
+	}
+
+	return out
 }
 
 func shouldPreserveBaseTitle(source, baseTitle string) bool {
