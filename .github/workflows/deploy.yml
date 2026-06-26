@@ -80,6 +80,7 @@ jobs:
           OTP_TTL=10m
           GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL=${{ secrets.GEMINI_MODEL }}
+          TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}
           MAIL_FROM=${{ secrets.MAIL_FROM }}
           RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
           SMTP_HOST=${{ secrets.SMTP_HOST }}
