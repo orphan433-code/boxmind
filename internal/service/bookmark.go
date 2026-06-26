@@ -62,6 +62,7 @@ type BookmarkMetaFallback interface {
 
 type bookmarkService struct {
 	repo         BookmarkRepository
+	cache        URLEnrichmentCacheRepository
 	enricher     BookmarkEnricher
 	imageFetcher BookmarkImageFetcher
 	metaFallback BookmarkMetaFallback
@@ -73,8 +74,19 @@ func NewBookmarkService(
 	imageFetcher BookmarkImageFetcher,
 	metaFallback BookmarkMetaFallback,
 ) BookmarkService {
+	return NewBookmarkServiceWithCache(repo, nil, enricher, imageFetcher, metaFallback)
+}
+
+func NewBookmarkServiceWithCache(
+	repo BookmarkRepository,
+	cache URLEnrichmentCacheRepository,
+	enricher BookmarkEnricher,
+	imageFetcher BookmarkImageFetcher,
+	metaFallback BookmarkMetaFallback,
+) BookmarkService {
 	return &bookmarkService{
 		repo:         repo,
+		cache:        cache,
 		enricher:     enricher,
 		imageFetcher: imageFetcher,
 		metaFallback: metaFallback,
@@ -110,6 +122,7 @@ func (s *bookmarkService) Create(ctx context.Context, userID string, input domai
 	}
 
 	s.applyQuickContentFallback(ctx, &input)
+	s.prefetchCreateCache(ctx, &input)
 
 	if input.ImageURL == "" {
 		if thumb := pagemeta.PlatformThumbnailURL(input.URL); thumb != "" {
@@ -192,7 +205,7 @@ func (s *bookmarkService) applyQuickContentFallback(ctx context.Context, input *
 }
 
 func (s *bookmarkService) enrichAsync(userID, bookmarkID, rawURL string) {
-	if s.enricher == nil && s.metaFallback == nil {
+	if s.enricher == nil && s.metaFallback == nil && s.cache == nil {
 		return
 	}
 
@@ -209,6 +222,18 @@ func (s *bookmarkService) enrichAsync(userID, bookmarkID, rawURL string) {
 		hints, ok := s.loadEnrichmentHints(loadCtx, userID, bookmarkID)
 		loadCancel()
 		if !ok {
+			return
+		}
+
+		cacheCtx, cacheCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		entry, cacheOK, err := s.cacheGet(cacheCtx, rawURL)
+		cacheCancel()
+		if err != nil {
+			log.Printf("[ENRICH-CACHE] lookup failed url=%s err=%v", rawURL, err)
+		} else if cacheOK && isUsableCacheEntry(entry) {
+			applyCtx, applyCancel := context.WithTimeout(context.Background(), 5*time.Second)
+			s.applyCachedEnrichment(applyCtx, userID, bookmarkID, rawURL, entry)
+			applyCancel()
 			return
 		}
 
@@ -433,6 +458,9 @@ func (s *bookmarkService) tryPersistEnrichment(ctx context.Context, userID, book
 		log.Printf("bookmark enrich update failed: %v", err)
 		return false
 	}
+
+	imageURL := s.bookmarkImageURL(ctx, userID, bookmarkID)
+	s.storeEnrichmentCache(ctx, rawURL, enrichment, imageURL)
 	return true
 }
 

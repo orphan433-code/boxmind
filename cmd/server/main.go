@@ -45,13 +45,14 @@ func main() {
 	userHandler := handler.NewUserHandler(userService)
 
 	bookmarkRepo := postgres.NewBookmarkRepository(db)
+	cacheRepo := postgres.NewURLEnrichmentCacheRepository(db)
 	geminiEnricher, err := gemini.NewEnricher(ctx, cfg.GeminiAPIKey, cfg.GeminiModel)
 	if err != nil {
 		log.Fatalf("gemini enricher init failed: %v", err)
 	}
 	imageFetcher := pagemeta.NewImageFetcher(pagemeta.NewImageHTTPExtractor())
 	metaFallback := pagemeta.NewMetaFallback(pagemeta.NewHTTPExtractor())
-	bookmarkService := service.NewBookmarkService(bookmarkRepo, geminiEnricher, imageFetcher, metaFallback)
+	bookmarkService := service.NewBookmarkServiceWithCache(bookmarkRepo, cacheRepo, geminiEnricher, imageFetcher, metaFallback)
 	bookmarkHandler := handler.NewBookmarkHandler(bookmarkService)
 
 	otpRepo := postgres.NewOTPRepository(db)
