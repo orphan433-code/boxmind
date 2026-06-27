@@ -23,16 +23,20 @@ Title rules:
 - For articles/how-to pages, prefer the actual question/topic.
 - For products, keep the product name/model.
 - For movies/series, keep the official title.
+- For job/vacancy pages (category jobs): keep the role name only — e.g. "Backend Go Developer", "iOS-разработчик".
+- Remove from job titles: site name, "вакансия", "работа", "vacancy", company suffix, city, salary, "на hh.ru", "Habr Career".
 - Preserve the language of proper names and original titles. Do not translate names by default.
 
 Description rules:
 - ALWAYS write in Russian.
-- Exactly ONE natural sentence, max 10-12 words.
+- Exactly ONE natural sentence, max 10-12 words (jobs may use up to 14 when salary is included).
 - Explain what the user saved, not where it is hosted.
 - Do not repeat the title word-for-word.
 - Do not copy SEO text from the source.
 - For shopping/product pages, describe what the item is and what it is for.
 - Do not include transactional metadata: price, rating, availability, delivery, seller info or promotional CTA.
+- For job/vacancy pages (category jobs): include useful facts FROM the signals only — format, level, salary when stated.
+- Skip unstated fields. Do NOT invent salary, location, or level. Do NOT write "зарплата не указана".
 - Do not say "доступно для просмотра онлайн", "можно скачать", "видеоматериал от..." or similar source/availability phrases.
 - If the exact details are unclear, write a neutral description from the known topic and category.
 
@@ -40,6 +44,9 @@ Examples:
 - Bad title: "Ноты для фортепиано, голоса, легкие ноты - скачать бесплатно"
   Good title: "Ноты для фортепиано"
   Good description: "Подборка нот для практики и обучения игре."
+- Bad title: "Backend Go Developer — вакансия на hh.ru"
+  Good title: "Backend Go Developer"
+  Good description: "Backend на Go: удалённо, middle+, до 350 000 ₽."
 - Bad title: "Как выучить ноты на грифе гитары - скачать бесплатно"
   Good title: "Как выучить ноты на грифе гитары"
   Good description: "Объяснение расположения нот на гитарном грифе."

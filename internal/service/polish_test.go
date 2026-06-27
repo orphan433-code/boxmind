@@ -86,3 +86,32 @@ func TestMergePolishedEnrichmentRefreshesShoppingDescription(t *testing.T) {
 		t.Fatalf("tags = %#v, want %#v", got.Tags, base.Tags)
 	}
 }
+
+func TestMergePolishedEnrichmentRefreshesJobsCard(t *testing.T) {
+	base := domain.BookmarkEnrichment{
+		Title:       "Backend Go Developer — вакансия на hh.ru",
+		Description: "Компания ищет разработчика на Go.",
+		Category:    "jobs",
+		Tags:        []string{"вакансия", "backend"},
+	}
+	polished := domain.BookmarkEnrichment{
+		Title:       "Backend Go Developer",
+		Description: "Backend на Go: удалённо, middle+, до 350 000 ₽.",
+		Category:    "jobs",
+		Tags:        []string{"вакансия", "golang"},
+	}
+
+	got := mergePolishedEnrichment(base, polished)
+	if got.Title != polished.Title {
+		t.Fatalf("title = %q, want %q", got.Title, polished.Title)
+	}
+	if got.Description != polished.Description {
+		t.Fatalf("description = %q, want %q", got.Description, polished.Description)
+	}
+	if got.Category != base.Category {
+		t.Fatalf("category = %q, want %q", got.Category, base.Category)
+	}
+	if got.Tags[0] != base.Tags[0] || got.Tags[1] != base.Tags[1] {
+		t.Fatalf("tags = %#v, want %#v", got.Tags, base.Tags)
+	}
+}

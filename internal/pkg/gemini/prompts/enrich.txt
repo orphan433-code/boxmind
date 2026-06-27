@@ -68,6 +68,14 @@ Description rules:
 - Describe WHAT this is, not WHERE it is hosted or HOW to use the site.
 - For shopping/product pages, describe what the item is and what it is for.
 - Do not include transactional metadata: price, rating, availability, delivery, seller info or promotional CTA.
+- For job/vacancy pages (category jobs): write one useful sentence with key facts FROM the page only.
+- Include when visible: format (удалённо/офис/гибрид), level (junior/middle/senior), salary (до 350 000 ₽, 3000–5000 $).
+- Skip fields that are not stated — do NOT write "зарплата не указана" or similar filler.
+- Job title: role name only (e.g. "Backend Go Developer", "iOS-разработчик"). Remove site name, "вакансия", company suffix, city, salary from title.
+- Good job description: "Backend на Go: удалённо, middle+, до 350 000 ₽."
+- Good job description: "iOS-разработчик: гибрид, senior."
+- Bad job title: "Backend Go Developer — вакансия на hh.ru"
+- Bad job description: "Вакансия Backend Go Developer на hh.ru — откликнуться."
 - Good: "Аниме о юноше без магии, который пробивается к вершине в мире чародейства."
 - Bad: "Аниме-сериал о юноше без магии, который прокладывает себе путь к вершине волшебного мира с помощью"
 

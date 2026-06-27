@@ -104,3 +104,16 @@ func TestNeedsPolishForShoppingCard(t *testing.T) {
 		t.Fatal("expected product title to stay valid")
 	}
 }
+
+func TestNeedsPolishForJobsCard(t *testing.T) {
+	e := domain.BookmarkEnrichment{
+		Title:       "Backend Go Developer — вакансия на hh.ru",
+		Description: "Компания ищет разработчика на Go.",
+		Category:    "jobs",
+		Tags:        []string{"вакансия", "backend"},
+	}
+
+	if !NeedsPolish(e, "") {
+		t.Fatal("expected jobs card to need polish")
+	}
+}

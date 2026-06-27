@@ -451,11 +451,12 @@ func mergePolishedEnrichment(base, polished domain.BookmarkEnrichment) domain.Bo
 	normalized := gemini.NormalizeEnrichment(polished)
 	out := base
 
-	if normalized.Title != "" && cardquality.BadTitle(base.Title) && cardquality.GoodTitle(normalized.Title) {
+	if normalized.Title != "" && cardquality.GoodTitle(normalized.Title) &&
+		(cardquality.BadTitle(base.Title) || shouldRefreshJobsTitle(base)) {
 		out.Title = normalized.Title
 	}
 	if normalized.Description != "" &&
-		(cardquality.BadDescription(base.Description, out.Title) || shouldRefreshShoppingDescription(base)) &&
+		(cardquality.BadDescription(base.Description, out.Title) || shouldRefreshCategoryDescription(base)) &&
 		cardquality.GoodDescription(normalized.Description) &&
 		!cardquality.BadDescription(normalized.Description, out.Title) {
 		out.Description = normalized.Description
@@ -470,8 +471,16 @@ func mergePolishedEnrichment(base, polished domain.BookmarkEnrichment) domain.Bo
 	return out
 }
 
-func shouldRefreshShoppingDescription(base domain.BookmarkEnrichment) bool {
-	return strings.TrimSpace(base.Category) == "shopping" && strings.TrimSpace(base.Description) != ""
+func shouldRefreshCategoryDescription(base domain.BookmarkEnrichment) bool {
+	category := strings.TrimSpace(base.Category)
+	if category != "shopping" && category != "jobs" {
+		return false
+	}
+	return strings.TrimSpace(base.Description) != ""
+}
+
+func shouldRefreshJobsTitle(base domain.BookmarkEnrichment) bool {
+	return strings.TrimSpace(base.Category) == "jobs" && strings.TrimSpace(base.Title) != ""
 }
 
 func shouldPreserveBaseTitle(source, baseTitle string) bool {

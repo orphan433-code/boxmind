@@ -44,6 +44,11 @@ Description rules:
 - Keep it brief — describe the gist, not every detail. Stop early instead of listing.
 - Must end naturally with . ! or ? — never a run-on, never cut mid-phrase.
 - Describe WHAT this is, not WHERE it is hosted or HOW to use the site.
+- For job/vacancy pages (category jobs): write one useful sentence with key facts FROM the page only.
+- Include when visible: format (удалённо/офис/гибрид), level (junior/middle/senior), salary (до 350 000 ₽, 3000–5000 $).
+- Skip fields that are not stated — do NOT write "зарплата не указана" or similar filler.
+- Job title: role name only. Remove site name, "вакансия", company suffix, city, salary from title.
+- Good job description: "Backend на Go: удалённо, middle+, до 350 000 ₽."
 - Good: "Аниме о юноше без магии, который пробивается к вершине в мире чародейства."
 - Bad: "Аниме-сериал о юноше без магии, который прокладывает себе путь к вершине волшебного мира с помощью"
 
