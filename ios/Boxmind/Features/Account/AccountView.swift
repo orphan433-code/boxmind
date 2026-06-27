@@ -3,6 +3,7 @@ import SwiftUI
 struct AccountView: View {
     @Environment(SessionStore.self) private var session
     @Bindable var viewModel: BookmarksViewModel
+    @State private var showOnboarding = false
 
     var body: some View {
         NavigationStack {
@@ -12,6 +13,12 @@ struct AccountView: View {
                         LabeledContent("Email", value: email)
                     }
                     LabeledContent("Закладок", value: "\(viewModel.bookmarks.count)")
+                }
+
+                Section {
+                    Button("Как сохранять ссылки") {
+                        showOnboarding = true
+                    }
                 }
 
                 Section {
@@ -28,6 +35,11 @@ struct AccountView: View {
                 }
             }
             .navigationTitle("Аккаунт")
+            .fullScreenCover(isPresented: $showOnboarding) {
+                OnboardingView {
+                    showOnboarding = false
+                }
+            }
         }
     }
 

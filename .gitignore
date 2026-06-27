@@ -9,6 +9,20 @@
 .idea/
 .vscode/
 
+# Xcode / iOS
+ios/build/
+build/
+DerivedData/
+*.xcuserstate
+**/xcuserdata/
+*.xcuserdatad/
+xcuserdata/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
 # Frontend
 web/node_modules/
 web/dist/

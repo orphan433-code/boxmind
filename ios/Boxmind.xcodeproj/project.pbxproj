@@ -18,6 +18,7 @@
 		44C08382DEF692FFFD3F75E5 /* BookmarksViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7952E9E4D969A9CED7A57A5D /* BookmarksViewModel.swift */; };
 		46AA7928D7D8A8CA279D590E /* AuthModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942014E49A745F669E340A2 /* AuthModels.swift */; };
 		4A3F73C6FD46C4A38E33DB5C /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B00A4400AD35D425F4AB374 /* User.swift */; };
+		50F485C8E03161C9DB134B8F /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F413DF103D7F3D6CB4620F8 /* OnboardingView.swift */; };
 		538CFD37946FF32428EBFF90 /* AddBookmarkSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6060081B181A2CF9DD15B65D /* AddBookmarkSheet.swift */; };
 		545CE4F74D30AC45FC5B614F /* AppGroupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA87379A45C3894AE558896E /* AppGroupStore.swift */; };
 		651B38CB5A6A614F092F10B5 /* BoxmindShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 050F7E3E207CD55BDAED5055 /* BoxmindShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -72,6 +73,7 @@
 		24B05689DB2DDE35CC4D7327 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
 		2C7277041180C9736EF2E2A5 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		2D9B0ECB212AA7BBBB9CEA8C /* APIConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIConfig.swift; sourceTree = "<group>"; };
+		2F413DF103D7F3D6CB4620F8 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		30D4EFEEDD5E6A9DBDEF0487 /* TagViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagViews.swift; sourceTree = "<group>"; };
 		4BF90ECE4CBD6D9EB9040894 /* Boxmind.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Boxmind.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		529C38C3F88403E0FBDA556B /* EnrichmentState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnrichmentState.swift; sourceTree = "<group>"; };
@@ -173,6 +175,7 @@
 				0C335AB4DC6DB4BDB78F60DE /* Bookmarks */,
 				9F862A412A5035461280C316 /* Categories */,
 				1168F9F14B3002A910401AC8 /* Home */,
+				FBA620B59B4E136D2D265042 /* Onboarding */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -287,6 +290,14 @@
 				050F7E3E207CD55BDAED5055 /* BoxmindShare.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		FBA620B59B4E136D2D265042 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				2F413DF103D7F3D6CB4620F8 /* OnboardingView.swift */,
+			);
+			path = Onboarding;
 			sourceTree = "<group>";
 		};
 		FC3D279448E2D02455FC73E9 /* Resources */ = {
@@ -416,6 +427,7 @@
 				080771F7BC2B0700167F3926 /* LoginView.swift in Sources */,
 				88B3EC7910C38BF396C8E870 /* LoginViewModel.swift in Sources */,
 				D1247AACDE9448238AFE5683 /* MainTabView.swift in Sources */,
+				50F485C8E03161C9DB134B8F /* OnboardingView.swift in Sources */,
 				B27906CD10758A496C570EAE /* RootView.swift in Sources */,
 				AED5A8D041B064EED7C25A6D /* SessionStore.swift in Sources */,
 				9A50D2D8219CCF19A5C8D01B /* TagViews.swift in Sources */,
