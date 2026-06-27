@@ -253,6 +253,7 @@ export function DashboardPage() {
 
         {bookmarks.length > 0 && (
           <BrowsePanel
+            key={isSearching ? "search" : activeSection}
             activeSection={activeSection}
             activeTag={activeTag}
             onClearTag={() => setActiveTag(null)}

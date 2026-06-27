@@ -5,6 +5,7 @@ import { isBookmarkEnriching } from "../utils/enrichment";
 
 type Props = {
   bookmark: Bookmark;
+  index?: number;
   onDelete: (id: string) => void;
   onTagClick?: (tag: string) => void;
   activeTag?: string | null;
@@ -14,6 +15,7 @@ type Props = {
 
 export function BookmarkCard({
   bookmark,
+  index = 0,
   onDelete,
   onTagClick,
   activeTag,
@@ -24,14 +26,17 @@ export function BookmarkCard({
   const hasImage = imageOk && Boolean(bookmark.image_url);
   const enriching = isBookmarkEnriching(bookmark);
 
+  const cardStyle = {
+    "--card-index": Math.min(index, 14),
+    ...(hasImage
+      ? { "--card-image": `url("${bookmark.image_url}")` }
+      : {}),
+  } as CSSProperties;
+
   return (
     <article
-      className={`bookmark-card cat-${bookmark.category || "other"}${hasImage ? " has-image" : ""}`}
-      style={
-        hasImage
-          ? ({ "--card-image": `url("${bookmark.image_url}")` } as CSSProperties)
-          : undefined
-      }
+      className={`bookmark-card cat-${bookmark.category || "other"}${hasImage ? " has-image" : ""}${deleting ? " is-deleting" : ""}`}
+      style={cardStyle}
     >
       {bookmark.image_url && (
         <img

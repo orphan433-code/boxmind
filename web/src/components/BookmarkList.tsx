@@ -31,10 +31,11 @@ export function BookmarkList({
 
   return (
     <div className="bookmark-grid">
-      {bookmarks.map((bookmark) => (
+      {bookmarks.map((bookmark, index) => (
         <BookmarkCard
           key={bookmark.id}
           bookmark={bookmark}
+          index={index}
           onDelete={onDelete}
           onTagClick={onTagClick}
           activeTag={activeTag}
