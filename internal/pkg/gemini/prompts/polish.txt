@@ -48,7 +48,7 @@ Examples:
 
 Category rules:
 - Pick ONE exact value from:
-  programming, design, news, movies, shopping, articles, learning, music, tools, entertainment, other
+  programming, design, news, movies, shopping, articles, learning, music, tools, entertainment, jobs, other
 - Prefer the existing category if it is not "other".
 
 Tags rules:

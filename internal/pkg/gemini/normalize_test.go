@@ -118,6 +118,20 @@ func TestApplyURLCategoryHints(t *testing.T) {
 	if len(profile.Tags) != 2 || profile.Tags[0] != "профиль" || profile.Tags[1] != "программирование" {
 		t.Fatalf("profile tags: got %v, want [профиль программирование]", profile.Tags)
 	}
+
+	vacancy := applyURLCategoryHints(
+		"https://hh.ru/vacancy/12345678",
+		domain.BookmarkEnrichment{
+			Category: "programming",
+			Tags:     []string{"документация", "golang"},
+		},
+	)
+	if vacancy.Category != "jobs" {
+		t.Fatalf("vacancy category: got %q, want jobs", vacancy.Category)
+	}
+	if len(vacancy.Tags) != 2 || vacancy.Tags[0] != "вакансия" || vacancy.Tags[1] != "golang" {
+		t.Fatalf("vacancy tags: got %v, want [вакансия golang]", vacancy.Tags)
+	}
 }
 
 func TestNormalizeEnrichmentUsefulTags(t *testing.T) {
@@ -137,5 +151,20 @@ func TestNormalizeEnrichmentUsefulTags(t *testing.T) {
 	})
 	if len(got.Tags) != 2 || got.Tags[0] != "инструмент" || got.Tags[1] != "программирование" {
 		t.Fatalf("got %v, want [инструмент программирование]", got.Tags)
+	}
+}
+
+func TestNormalizeEnrichmentJobsCategory(t *testing.T) {
+	t.Parallel()
+
+	got := NormalizeEnrichment(domain.BookmarkEnrichment{
+		Category: "work",
+		Tags:     []string{"backend", "golang"},
+	})
+	if got.Category != "jobs" {
+		t.Fatalf("category = %q, want jobs", got.Category)
+	}
+	if len(got.Tags) != 2 || got.Tags[0] != "вакансия" || got.Tags[1] != "backend" {
+		t.Fatalf("tags = %v, want [вакансия backend]", got.Tags)
 	}
 }

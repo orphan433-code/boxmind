@@ -9,6 +9,7 @@ enum CategoryLabels {
         "programming",
         "tools",
         "shopping",
+        "jobs",
         "news",
         "design",
         "entertainment",
@@ -20,6 +21,7 @@ enum CategoryLabels {
         "articles": "book.fill",
         "programming": "chevron.left.forwardslash.chevron.right",
         "shopping": "bag.fill",
+        "jobs": "briefcase.fill",
         "learning": "graduationcap.fill",
         "music": "music.note",
         "news": "newspaper.fill",
@@ -34,6 +36,7 @@ enum CategoryLabels {
         "articles": "Читать",
         "programming": "Полезное",
         "shopping": "Покупки",
+        "jobs": "Работа",
         "learning": "Учиться",
         "music": "Слушать",
         "news": "Новости",
@@ -61,6 +64,7 @@ enum CategoryLabels {
         "programming": .blue,
         "tools": .blue,
         "shopping": .teal,
+        "jobs": .cyan,
         "design": .indigo,
         "other": .gray
     ]

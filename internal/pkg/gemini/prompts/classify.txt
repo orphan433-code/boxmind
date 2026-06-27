@@ -49,7 +49,7 @@ Description rules:
 
 Category rules:
 - Pick ONE exact value from:
-  programming, design, news, movies, shopping, articles, learning, music, tools, entertainment, other
+  programming, design, news, movies, shopping, articles, learning, music, tools, entertainment, jobs, other
 
 Classification algorithm (FOLLOW IN THIS ORDER — main rule):
 
@@ -91,6 +91,7 @@ Step 1 — What does the USER DO on this page? Category = action/format, NOT top
   USE while coding (official docs, API reference, package readme) -> programming
   WATCH a gaming video (gameplay, stream, clip) -> entertainment; a game guide -> learning; game mods/tools/store -> tools
   SHOP (product listing, store) -> shopping
+  APPLY to a job / save a vacancy listing -> jobs
 
 Step 2 — What is it ABOUT? Topic goes in tag #2 only — never pick category from topic alone.
 
@@ -103,6 +104,9 @@ Common mistakes to avoid:
 
   WRONG: film or anime topic -> articles (when user WATCHES on a streaming page)
   RIGHT: watch anime -> movies, tags: ["аниме", "фэнтези"]
+
+  WRONG: Go/React/iOS developer vacancy -> programming (because the stack is mentioned)
+  RIGHT: developer vacancy listing -> jobs, tags: ["вакансия", "backend"|"frontend"|"ios"|"golang"|...]
 
   WRONG: sheet music of a band -> music (because the topic is a music band)
   RIGHT: sheet music / scores to play -> learning, tags: ["ноты", genre]
@@ -122,6 +126,10 @@ Page type details:
 - music -> listen to or download songs: streaming, albums, artists, playlists, track pages, music services
 - NOT music: sheet music scores (use learning + tag ноты), music theory tutorials (use learning)
 - news -> READ a news article on a news site (text to read). NOT a video about news.
+- jobs -> APPLY to or save a specific job vacancy listing.
+- NOT jobs: career advice articles, interview guides, salary reports, company about pages without a vacancy.
+  Those are learning or articles.
+- NOT programming: a developer vacancy is jobs, not programming — stack goes in tag #2 only.
 - NOT entertainment: sheet music, MuseScore, tutorials — use learning; song/album/stream pages — use music, not entertainment
 - Review or blog post -> articles (tags: статья, обзор, ...)
 
@@ -141,6 +149,9 @@ Examples:
 - Go tutorial step-by-step -> learning, tags: ["туториал", "golang"]
 - Go documentation -> programming, tags: ["документация", "golang"]
 - LeetCode profile -> programming, tags: ["профиль", "программирование"]
+- Go Backend Developer vacancy on hh.ru -> jobs, tags: ["вакансия", "backend"]
+- iOS developer vacancy -> jobs, tags: ["вакансия", "ios"]
+- "How to pass a Go interview" article -> learning, tags: ["гайд", "golang"]
 
 Tags rules:
 - Return exactly 2 tags — no more, no less:
@@ -184,6 +195,7 @@ Tags rules:
     NEVER use generic tags like ссылка, разное, контент for these categories
   programming -> документация, справка, профиль разработчика + topic (golang, react, devops). NEVER курс, урок, туториал here.
   shopping -> товар + category (hardware, electronics, одежда)
+  jobs -> вакансия + role/specialty (frontend, backend, ios, golang, дизайн, маркетинг, менеджмент, devops, аналитика, ...)
   news -> новость + topic (tech, politics, sport)
   game content -> watching gameplay/stream: entertainment ["видео"|"стрим", game]; guide: learning ["гайд", game]; mods/tools: tools ["инструмент", game]
 
@@ -201,6 +213,7 @@ Examples:
 - MuseScore score -> category: learning, tags: ["ноты", "классика"]
 - Sheet music catalog for a band (e.g. The Beatles) -> category: learning, tags: ["ноты", "рок"]
 - Spotify / Apple Music track -> category: music, tags: ["трек", "поп"]
+- Go Backend vacancy on hh.ru -> category: jobs, tags: ["вакансия", "backend"]
 
 Known sites (apply when URL matches — same rules every time):
 - musescore.com, ultimate-guitar.com (tabs/scores):
@@ -222,6 +235,11 @@ Known sites (apply when URL matches — same rules every time):
 - leetcode.com, github.com (profile pages):
   category: programming
   tags: ["профиль", "программирование"]
+- hh.ru/vacancy/, career.habr.com/vacancies/, habr.com/vacancies/, linkedin.com/jobs/,
+  superjob.ru/vakansii, zarplata.ru/vacancy, jobs.lever.co, boards.greenhouse.io:
+  category: jobs
+  tags: ["вакансия", role/specialty]
+  NEVER: programming, articles, other for a specific vacancy page
 - (YouTube: see Platform overrides above)
 
 Language summary (STRICT):

@@ -42,6 +42,7 @@ export const CATEGORY_LABELS: Record<string, string> = {
   design: "Дизайн",
   tools: "Полезное",
   entertainment: "Развлечения",
+  jobs: "Работа",
   other: "Другое",
 };
 

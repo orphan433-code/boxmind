@@ -24,6 +24,7 @@ var allowedCategories = map[string]struct{}{
 	"music":         {},
 	"tools":         {},
 	"entertainment": {},
+	"jobs":          {},
 	"other":         {},
 }
 
@@ -43,6 +44,12 @@ var categoryAliases = map[string]string{
 	"sheet-music": "learning",
 	"game":        "entertainment",
 	"gaming":      "entertainment",
+	"work":        "jobs",
+	"career":      "jobs",
+	"vacancy":     "jobs",
+	"vacancies":   "jobs",
+	"job":         "jobs",
+	"работа":      "jobs",
 }
 
 var tagAliases = map[string]string{
@@ -68,6 +75,8 @@ var tagAliases = map[string]string{
 	"tool":          "инструмент",
 	"docs":          "документация",
 	"documentation": "документация",
+	"vacancy":       "вакансия",
+	"job":           "вакансия",
 }
 
 func NormalizeEnrichment(enrichment domain.BookmarkEnrichment) domain.BookmarkEnrichment {
@@ -179,9 +188,52 @@ func normalizeTagsForCategory(category string, tags []string) []string {
 	switch category {
 	case "programming", "design", "tools":
 		return normalizeUsefulTags(normalized)
+	case "jobs":
+		return normalizeJobTags(normalized)
 	default:
 		return normalized
 	}
+}
+
+func normalizeJobTags(tags []string) []string {
+	if len(tags) == 0 {
+		return []string{"вакансия"}
+	}
+
+	skipAsSecond := map[string]struct{}{
+		"документация": {},
+		"профиль":      {},
+		"инструмент":   {},
+		"репозиторий":  {},
+		"статья":       {},
+		"новость":      {},
+		"товар":        {},
+	}
+
+	second := ""
+	for _, tag := range tags {
+		if tag == "вакансия" {
+			continue
+		}
+		if _, skip := skipAsSecond[tag]; skip {
+			continue
+		}
+		second = tag
+		break
+	}
+	if second == "" {
+		for _, tag := range tags {
+			if tag != "вакансия" {
+				second = tag
+				break
+			}
+		}
+	}
+
+	if second == "" {
+		return []string{"вакансия"}
+	}
+	return []string{"вакансия", second}
 }
 
 func normalizeUsefulTags(tags []string) []string {

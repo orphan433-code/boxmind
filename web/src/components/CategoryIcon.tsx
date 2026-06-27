@@ -38,6 +38,14 @@ export function CategoryIcon({ category }: Props) {
           <circle cx="17" cy="19" r="1.5" />
         </svg>
       );
+    case "jobs":
+      return (
+        <svg {...common}>
+          <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+          <rect x="3" y="7" width="18" height="13" rx="2" />
+          <path d="M3 12h18" />
+        </svg>
+      );
     case "gaming":
       return (
         <svg {...common}>

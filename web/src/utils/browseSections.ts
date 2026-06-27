@@ -8,6 +8,7 @@ export type BrowseSectionId =
   | "learn"
   | "code"
   | "shop"
+  | "work"
   | "other"
   | "all";
 
@@ -63,6 +64,12 @@ export const BROWSE_SECTIONS: BrowseSection[] = [
     label: "Покупки",
     categories: ["shopping"],
     emptyHint: "Здесь будут товары и магазины",
+  },
+  {
+    id: "work",
+    label: "Работа",
+    categories: ["jobs"],
+    emptyHint: "Здесь будут вакансии и карьерные возможности",
   },
   {
     id: "other",

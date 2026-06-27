@@ -20,6 +20,14 @@ func applyURLCategoryHints(pageURL string, enrichment domain.BookmarkEnrichment)
 		enrichment.Tags = normalizeTags([]string{"профиль", "программирование"})
 	}
 
+	if isJobListingURL(pageURL) {
+		switch enrichment.Category {
+		case "programming", "articles", "other", "tools", "news":
+			enrichment.Category = "jobs"
+			enrichment.Tags = normalizeTagsForCategory("jobs", enrichment.Tags)
+		}
+	}
+
 	return enrichment
 }
 
@@ -36,6 +44,22 @@ func isDevProfileURL(raw string) bool {
 	u := strings.ToLower(raw)
 	return strings.Contains(u, "leetcode.com/u/") ||
 		(strings.Contains(u, "github.com/") && !strings.Contains(u, "github.com/topics"))
+}
+
+func isJobListingURL(raw string) bool {
+	u := strings.ToLower(raw)
+	return strings.Contains(u, "hh.ru/vacancy") ||
+		strings.Contains(u, "career.habr.com/vacancies") ||
+		strings.Contains(u, "habr.com/vacancies/") ||
+		strings.Contains(u, "linkedin.com/jobs/view") ||
+		strings.Contains(u, "linkedin.com/jobs/collections") ||
+		strings.Contains(u, "jobs.lever.co/") ||
+		strings.Contains(u, "boards.greenhouse.io/") ||
+		strings.Contains(u, "apply.workable.com/") ||
+		strings.Contains(u, "indeed.com/viewjob") ||
+		strings.Contains(u, "glassdoor.com/job-listing") ||
+		strings.Contains(u, "superjob.ru/vakansii") ||
+		strings.Contains(u, "zarplata.ru/vacancy")
 }
 
 func fixMisclassifiedVideoTags(tags []string) []string {
