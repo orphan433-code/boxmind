@@ -455,7 +455,7 @@ func mergePolishedEnrichment(base, polished domain.BookmarkEnrichment) domain.Bo
 		out.Title = normalized.Title
 	}
 	if normalized.Description != "" &&
-		cardquality.BadDescription(base.Description, out.Title) &&
+		(cardquality.BadDescription(base.Description, out.Title) || shouldRefreshShoppingDescription(base)) &&
 		cardquality.GoodDescription(normalized.Description) &&
 		!cardquality.BadDescription(normalized.Description, out.Title) {
 		out.Description = normalized.Description
@@ -468,6 +468,10 @@ func mergePolishedEnrichment(base, polished domain.BookmarkEnrichment) domain.Bo
 	}
 
 	return out
+}
+
+func shouldRefreshShoppingDescription(base domain.BookmarkEnrichment) bool {
+	return strings.TrimSpace(base.Category) == "shopping" && strings.TrimSpace(base.Description) != ""
 }
 
 func shouldPreserveBaseTitle(source, baseTitle string) bool {

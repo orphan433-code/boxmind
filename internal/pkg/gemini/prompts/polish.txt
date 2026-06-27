@@ -31,6 +31,8 @@ Description rules:
 - Explain what the user saved, not where it is hosted.
 - Do not repeat the title word-for-word.
 - Do not copy SEO text from the source.
+- For shopping/product pages, describe what the item is and what it is for.
+- Do not include transactional metadata: price, rating, availability, delivery, seller info or promotional CTA.
 - Do not say "доступно для просмотра онлайн", "можно скачать", "видеоматериал от..." or similar source/availability phrases.
 - If the exact details are unclear, write a neutral description from the known topic and category.
 

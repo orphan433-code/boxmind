@@ -66,6 +66,8 @@ Description rules:
 - Must end naturally with . ! or ? — never a run-on, never cut mid-phrase.
 - Do NOT copy long text from the page. Compress the idea into a few words.
 - Describe WHAT this is, not WHERE it is hosted or HOW to use the site.
+- For shopping/product pages, describe what the item is and what it is for.
+- Do not include transactional metadata: price, rating, availability, delivery, seller info or promotional CTA.
 - Good: "Аниме о юноше без магии, который пробивается к вершине в мире чародейства."
 - Bad: "Аниме-сериал о юноше без магии, который прокладывает себе путь к вершине волшебного мира с помощью"
 

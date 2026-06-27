@@ -143,6 +143,9 @@ func NeedsPolish(e domain.BookmarkEnrichment, imageURL string) bool {
 	if strings.TrimSpace(e.Title) == "" && strings.TrimSpace(e.Description) == "" {
 		return false
 	}
+	if strings.TrimSpace(e.Category) == "shopping" && strings.TrimSpace(e.Description) != "" {
+		return true
+	}
 	return BadTitle(e.Title) || BadDescription(e.Description, e.Title)
 }
 

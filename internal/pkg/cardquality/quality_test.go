@@ -88,3 +88,19 @@ func TestNeedsPolishKeepsCleanCard(t *testing.T) {
 		t.Fatal("expected clean card to skip polish")
 	}
 }
+
+func TestNeedsPolishForShoppingCard(t *testing.T) {
+	e := domain.BookmarkEnrichment{
+		Title:       "Фильтр AQUASOFT Classic-5",
+		Description: "Купить AQUASOFT Classic-5 за 67990 тг.",
+		Category:    "shopping",
+		Tags:        []string{"товар", "бытовая-техника"},
+	}
+
+	if !NeedsPolish(e, "") {
+		t.Fatal("expected shopping card to need polish")
+	}
+	if BadTitle(e.Title) {
+		t.Fatal("expected product title to stay valid")
+	}
+}

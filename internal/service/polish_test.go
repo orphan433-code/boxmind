@@ -57,3 +57,32 @@ func TestMergePolishedEnrichmentKeepsCleanText(t *testing.T) {
 		t.Fatalf("description changed: got %q", got.Description)
 	}
 }
+
+func TestMergePolishedEnrichmentRefreshesShoppingDescription(t *testing.T) {
+	base := domain.BookmarkEnrichment{
+		Title:       "Фильтр AQUASOFT Classic-5",
+		Description: "Купить AQUASOFT Classic-5 за 67990 тг.",
+		Category:    "shopping",
+		Tags:        []string{"товар", "бытовая-техника"},
+	}
+	polished := domain.BookmarkEnrichment{
+		Title:       "AQUASOFT Classic-5",
+		Description: "Фильтр для очистки питьевой воды дома.",
+		Category:    "shopping",
+		Tags:        []string{"товар", "фильтр"},
+	}
+
+	got := mergePolishedEnrichment(base, polished)
+	if got.Title != base.Title {
+		t.Fatalf("title changed: got %q", got.Title)
+	}
+	if got.Description != polished.Description {
+		t.Fatalf("description = %q, want %q", got.Description, polished.Description)
+	}
+	if got.Category != base.Category {
+		t.Fatalf("category = %q, want %q", got.Category, base.Category)
+	}
+	if got.Tags[0] != base.Tags[0] || got.Tags[1] != base.Tags[1] {
+		t.Fatalf("tags = %#v, want %#v", got.Tags, base.Tags)
+	}
+}
