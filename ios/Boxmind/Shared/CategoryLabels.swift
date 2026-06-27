@@ -42,8 +42,8 @@ enum CategoryLabels {
         "jobs": "Работа",
         "learning": "Учиться",
         "music": "Слушать",
-        "news": "Новости",
-        "design": "Дизайн",
+        "news": "Читать",
+        "design": "Полезное",
         "tools": "Полезное",
         "entertainment": "Смотреть",
         "other": "Другое"

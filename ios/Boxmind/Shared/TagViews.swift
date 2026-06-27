@@ -73,7 +73,7 @@ enum BookmarkFiltering {
                 bookmark.title,
                 bookmark.description,
                 bookmark.url,
-                CategoryLabels.label(for: bookmark.category),
+                CategoryLabels.group(for: bookmark.category),
                 bookmark.tags.joined(separator: " ")
             ].joined(separator: " ").lowercased()
 

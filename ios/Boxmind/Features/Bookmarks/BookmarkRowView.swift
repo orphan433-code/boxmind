@@ -29,7 +29,7 @@ struct BookmarkRowView: View {
                 }
 
                 HStack(spacing: 6) {
-                    Text(CategoryLabels.label(for: bookmark.category))
+                    Text(CategoryLabels.group(for: bookmark.category))
                         .font(.caption.weight(.semibold))
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
