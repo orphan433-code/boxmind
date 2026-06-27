@@ -46,6 +46,13 @@ export function CategoryIcon({ category }: Props) {
           <path d="M3 12h18" />
         </svg>
       );
+    case "services":
+      return (
+        <svg {...common}>
+          <path d="M4 13.5 8.5 18a3 3 0 0 0 4.2 0l6.8-6.8a2.4 2.4 0 0 0-3.4-3.4l-5.4 5.4" />
+          <path d="M8 12.5 10.5 15M5.5 9.5l3-3 4 4" />
+        </svg>
+      );
     case "gaming":
       return (
         <svg {...common}>

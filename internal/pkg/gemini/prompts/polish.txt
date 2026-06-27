@@ -22,6 +22,7 @@ Title rules:
   "без регистрации", "на сайте", "для начинающих и профессионалов", site names.
 - For articles/how-to pages, prefer the actual question/topic.
 - For products, keep the product name/model.
+- For services, keep the service name/topic only — e.g. "Создание сайтов и ботов", "Маникюр".
 - For movies/series, keep the official title.
 - For job/vacancy pages (category jobs): keep the role name only — e.g. "Backend Go Developer", "iOS-разработчик".
 - Remove from job titles: site name, "вакансия", "работа", "vacancy", company suffix, city, salary, "на hh.ru", "Habr Career".
@@ -35,6 +36,8 @@ Description rules:
 - Do not copy SEO text from the source.
 - For shopping/product pages, describe what the item is and what it is for.
 - Do not include transactional metadata: price, rating, availability, delivery, seller info or promotional CTA.
+- For service/provider pages (category services), describe the service and its purpose.
+- Do not include promotional CTA, prices, discounts, guarantees, city, or "order now" wording unless essential to the service name.
 - For job/vacancy pages (category jobs): include useful facts FROM the signals only — format, level, salary when stated.
 - Skip unstated fields. Do NOT invent salary, location, or level. Do NOT write "зарплата не указана".
 - Do not say "доступно для просмотра онлайн", "можно скачать", "видеоматериал от..." or similar source/availability phrases.
@@ -47,6 +50,9 @@ Examples:
 - Bad title: "Backend Go Developer — вакансия на hh.ru"
   Good title: "Backend Go Developer"
   Good description: "Backend на Go: удалённо, middle+, до 350 000 ₽."
+- Bad title: "Создание сайтов, ботов и ИИ-решений — под задачи именно вашего бизнеса"
+  Good title: "Создание сайтов, ботов и ИИ-решений"
+  Good description: "Разработка цифровых решений под задачи бизнеса."
 - Bad title: "Как выучить ноты на грифе гитары - скачать бесплатно"
   Good title: "Как выучить ноты на грифе гитары"
   Good description: "Объяснение расположения нот на гитарном грифе."
@@ -55,10 +61,11 @@ Examples:
 
 Category rules:
 - Pick ONE exact value from:
-  programming, design, news, movies, shopping, articles, learning, music, tools, entertainment, jobs, other
+  programming, design, news, movies, shopping, services, articles, learning, music, tools, entertainment, jobs, other
 - Prefer the existing category if it is not "other".
 
 Tags rules:
 - Return 2-4 short lowercase Russian tags.
 - Prefer existing tags when they are relevant.
+- For category services, prefer tags starting with ["услуга", topic].
 - Remove only generic tags like "ссылка", "страница", "сайт" when better tags are obvious.

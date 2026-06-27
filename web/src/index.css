@@ -1155,6 +1155,10 @@ button:disabled {
   --card-fallback: linear-gradient(145deg, #3a2618 0%, #171512 100%);
 }
 
+.bookmark-card.cat-services {
+  --card-fallback: linear-gradient(145deg, #273322 0%, #121812 100%);
+}
+
 .bookmark-card.cat-jobs {
   --card-fallback: linear-gradient(145deg, #243040 0%, #121820 100%);
 }

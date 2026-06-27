@@ -117,3 +117,16 @@ func TestNeedsPolishForJobsCard(t *testing.T) {
 		t.Fatal("expected jobs card to need polish")
 	}
 }
+
+func TestNeedsPolishForServicesCard(t *testing.T) {
+	e := domain.BookmarkEnrichment{
+		Title:       "Создание сайтов, ботов и ИИ-решений — под задачи именно вашего бизнеса",
+		Description: "Разработка сайтов, ботов и ИИ-решений для вашего бизнеса.",
+		Category:    "services",
+		Tags:        []string{"услуга", "разработка"},
+	}
+
+	if !NeedsPolish(e, "") {
+		t.Fatal("expected services card to need polish")
+	}
+}

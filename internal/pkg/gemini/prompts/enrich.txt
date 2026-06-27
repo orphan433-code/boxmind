@@ -68,6 +68,8 @@ Description rules:
 - Describe WHAT this is, not WHERE it is hosted or HOW to use the site.
 - For shopping/product pages, describe what the item is and what it is for.
 - Do not include transactional metadata: price, rating, availability, delivery, seller info or promotional CTA.
+- For service/provider pages (category services), describe the service and its purpose, not the sales pitch.
+- Do not include promotional CTA, prices, discounts, guarantees, city, or "order now" wording unless essential to the service name.
 - For job/vacancy pages (category jobs): write one useful sentence with key facts FROM the page only.
 - Include when visible: format (удалённо/офис/гибрид), level (junior/middle/senior), salary (до 350 000 ₽, 3000–5000 $).
 - Skip fields that are not stated — do NOT write "зарплата не указана" or similar filler.
@@ -81,7 +83,7 @@ Description rules:
 
 Category rules:
 - Pick ONE exact value from:
-  programming, design, news, movies, shopping, articles, learning, music, tools, entertainment, jobs, other
+  programming, design, news, movies, shopping, services, articles, learning, music, tools, entertainment, jobs, other
 
 Classification algorithm (FOLLOW IN THIS ORDER — main rule):
 
@@ -125,6 +127,7 @@ Step 1 — What does the USER DO on this page? Category = action/format, NOT top
   USE while coding (official docs, API reference, package readme) -> programming
   WATCH a gaming video (gameplay, stream, clip) -> entertainment; a game guide -> learning; game mods/tools/store -> tools
   SHOP (product listing, store) -> shopping
+  ORDER / consider a service provider (manicure, repair, web development, legal help, beauty, clinic, agency) -> services
   APPLY to a job / save a vacancy listing -> jobs
 
 Step 2 — What is it ABOUT? Topic goes in tag #2 only — never pick category from topic alone.
@@ -142,6 +145,9 @@ Common mistakes to avoid:
   WRONG: Go/React/iOS developer vacancy -> programming (because the stack is mentioned)
   RIGHT: developer vacancy listing -> jobs, tags: ["вакансия", "backend"|"frontend"|"ios"|"golang"|...]
 
+  WRONG: service provider page -> shopping (because money/order is involved)
+  RIGHT: service provider page -> services, tags: ["услуга", topic]
+
 Same platform — different categories (decide by content, not by domain alone):
   bbc.com + text article -> news
   go.dev/doc -> programming
@@ -157,6 +163,9 @@ Page type details:
 - music -> listen to or download songs: streaming, albums, artists, playlists, track pages, music services
 - NOT music: sheet music scores (use learning + tag ноты), music theory tutorials (use learning)
 - news -> READ a news article on a news site (text to read). NOT a video about news.
+- services -> ORDER or consider a service/provider: web development, bots, AI solutions, manicure, repairs,
+  legal help, medical/beauty services, agency pages, local service landing pages.
+- NOT services: SaaS/product tools the user uses directly (tools), products to buy (shopping), tutorials (learning).
 - jobs -> APPLY to or save a specific job vacancy listing.
 - NOT jobs: career advice articles, interview guides, salary reports, company about pages without a vacancy.
   Those are learning or articles.
@@ -226,6 +235,7 @@ Tags rules:
     NEVER use generic tags like ссылка, разное, контент for these categories
   programming -> документация, справка, профиль разработчика + topic (golang, react, devops). NEVER курс, урок, туториал here.
   shopping -> товар + category (hardware, electronics, одежда)
+  services -> услуга + open topic (разработка, маникюр, ремонт, дизайн, маркетинг, юристы, красота, здоровье, авто, ...)
   jobs -> вакансия + role/specialty (frontend, backend, ios, golang, дизайн, маркетинг, менеджмент, devops, аналитика, ...)
   news -> новость + topic (tech, politics, sport)
   game content -> watching gameplay/stream: entertainment ["видео"|"стрим", game]; guide: learning ["гайд", game]; mods/tools: tools ["инструмент", game]
@@ -238,6 +248,8 @@ Examples:
 - Anime fantasy stream -> category: movies, tags: ["аниме", "фэнтези"]
 - Horror film stream -> category: movies, tags: ["фильм", "ужасы"]
 - GPU listing -> category: shopping, tags: ["товар", "hardware"]
+- Web development agency/service -> category: services, tags: ["услуга", "разработка"]
+- Manicure studio/service page -> category: services, tags: ["услуга", "маникюр"]
 - Go docs -> category: programming, tags: ["документация", "golang"]
 - YouTube full Go course for beginners -> category: learning, tags: ["курс", "golang"]
 - YouTube political documentary / news topic video -> category: entertainment, tags: ["видео", "политика"]

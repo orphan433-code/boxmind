@@ -25,6 +25,7 @@ var allowedCategories = map[string]struct{}{
 	"tools":         {},
 	"entertainment": {},
 	"jobs":          {},
+	"services":      {},
 	"other":         {},
 }
 
@@ -50,6 +51,10 @@ var categoryAliases = map[string]string{
 	"vacancies":   "jobs",
 	"job":         "jobs",
 	"работа":      "jobs",
+	"service":     "services",
+	"services":    "services",
+	"услуга":      "services",
+	"услуги":      "services",
 }
 
 var tagAliases = map[string]string{
@@ -77,6 +82,15 @@ var tagAliases = map[string]string{
 	"documentation": "документация",
 	"vacancy":       "вакансия",
 	"job":           "вакансия",
+	"service":       "услуга",
+	"services":      "услуга",
+	"development":   "разработка",
+	"beauty":        "красота",
+	"repair":        "ремонт",
+	"law":           "юристы",
+	"legal":         "юристы",
+	"health":        "здоровье",
+	"auto":          "авто",
 }
 
 func NormalizeEnrichment(enrichment domain.BookmarkEnrichment) domain.BookmarkEnrichment {
@@ -190,9 +204,31 @@ func normalizeTagsForCategory(category string, tags []string) []string {
 		return normalizeUsefulTags(normalized)
 	case "jobs":
 		return normalizeJobTags(normalized)
+	case "services":
+		return normalizeServiceTags(normalized)
 	default:
 		return normalized
 	}
+}
+
+func normalizeServiceTags(tags []string) []string {
+	if len(tags) == 0 {
+		return []string{"услуга"}
+	}
+
+	second := ""
+	for _, tag := range tags {
+		if tag == "услуга" {
+			continue
+		}
+		second = tag
+		break
+	}
+
+	if second == "" {
+		return []string{"услуга"}
+	}
+	return []string{"услуга", second}
 }
 
 func normalizeJobTags(tags []string) []string {

@@ -168,3 +168,18 @@ func TestNormalizeEnrichmentJobsCategory(t *testing.T) {
 		t.Fatalf("tags = %v, want [вакансия backend]", got.Tags)
 	}
 }
+
+func TestNormalizeEnrichmentServicesCategory(t *testing.T) {
+	t.Parallel()
+
+	got := NormalizeEnrichment(domain.BookmarkEnrichment{
+		Category: "service",
+		Tags:     []string{"development", "ai"},
+	})
+	if got.Category != "services" {
+		t.Fatalf("category = %q, want services", got.Category)
+	}
+	if len(got.Tags) != 2 || got.Tags[0] != "услуга" || got.Tags[1] != "разработка" {
+		t.Fatalf("tags = %v, want [услуга разработка]", got.Tags)
+	}
+}
