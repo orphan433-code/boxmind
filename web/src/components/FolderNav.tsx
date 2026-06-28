@@ -73,7 +73,7 @@ function FolderIcon() {
       strokeLinejoin="round"
       aria-hidden
     >
-      <path d="M4 20h16a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H9l-2 3H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1z" />
+      <path d="M3 8a2 2 0 0 1 2-2h3.6a2 2 0 0 1 1.4.6L11.8 8H19a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
     </svg>
   );
 }

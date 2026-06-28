@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { Folder } from "../types";
 
 type Props = {
@@ -7,27 +8,58 @@ type Props = {
   onAssign: (folderId: string | null) => void;
 };
 
+const MENU_WIDTH = 200;
+const VIEWPORT_MARGIN = 8;
+
 export function FolderMenu({ folders, activeFolderId, onAssign }: Props) {
   const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
+  const [coords, setCoords] = useState({ top: 0, left: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const isAssigned = Boolean(activeFolderId);
+
+  const updatePosition = useCallback(() => {
+    const button = buttonRef.current;
+    if (!button) return;
+    const rect = button.getBoundingClientRect();
+    const left = Math.max(
+      VIEWPORT_MARGIN,
+      Math.min(rect.right - MENU_WIDTH, window.innerWidth - MENU_WIDTH - VIEWPORT_MARGIN),
+    );
+    setCoords({ top: rect.bottom + 6, left });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (open) updatePosition();
+  }, [open, updatePosition]);
 
   useEffect(() => {
     if (!open) return;
 
     function handlePointer(event: MouseEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false);
+      const target = event.target as Node;
+      if (buttonRef.current?.contains(target) || menuRef.current?.contains(target)) {
+        return;
       }
+      setOpen(false);
     }
     function handleKey(event: KeyboardEvent) {
       if (event.key === "Escape") setOpen(false);
     }
+    function handleReflow() {
+      setOpen(false);
+    }
 
     document.addEventListener("mousedown", handlePointer);
     document.addEventListener("keydown", handleKey);
+    window.addEventListener("resize", handleReflow);
+    window.addEventListener("scroll", handleReflow, true);
     return () => {
       document.removeEventListener("mousedown", handlePointer);
       document.removeEventListener("keydown", handleKey);
+      window.removeEventListener("resize", handleReflow);
+      window.removeEventListener("scroll", handleReflow, true);
     };
   }, [open]);
 
@@ -36,11 +68,10 @@ export function FolderMenu({ folders, activeFolderId, onAssign }: Props) {
     setOpen(false);
   }
 
-  const isAssigned = Boolean(activeFolderId);
-
   return (
-    <div className="folder-menu" ref={rootRef}>
+    <>
       <button
+        ref={buttonRef}
         type="button"
         className={isAssigned ? "icon-btn folder-btn assigned" : "icon-btn folder-btn"}
         onClick={() => setOpen((value) => !value)}
@@ -51,38 +82,45 @@ export function FolderMenu({ folders, activeFolderId, onAssign }: Props) {
         <FolderGlyph />
       </button>
 
-      {open && (
-        <div className="folder-menu-popover" role="menu">
-          <button
-            type="button"
-            role="menuitemradio"
-            aria-checked={!isAssigned}
-            className={!isAssigned ? "folder-menu-item active" : "folder-menu-item"}
-            onClick={() => choose(null)}
+      {open &&
+        createPortal(
+          <div
+            ref={menuRef}
+            className="folder-menu-popover"
+            role="menu"
+            style={{ top: coords.top, left: coords.left, width: MENU_WIDTH }}
           >
-            <span>Без папки</span>
-            {!isAssigned && <CheckGlyph />}
-          </button>
+            <button
+              type="button"
+              role="menuitemradio"
+              aria-checked={!isAssigned}
+              className={!isAssigned ? "folder-menu-item active" : "folder-menu-item"}
+              onClick={() => choose(null)}
+            >
+              <span>Без папки</span>
+              {!isAssigned && <CheckGlyph />}
+            </button>
 
-          {folders.map((folder) => {
-            const active = folder.id === activeFolderId;
-            return (
-              <button
-                key={folder.id}
-                type="button"
-                role="menuitemradio"
-                aria-checked={active}
-                className={active ? "folder-menu-item active" : "folder-menu-item"}
-                onClick={() => choose(folder.id)}
-              >
-                <span>{folder.name}</span>
-                {active && <CheckGlyph />}
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
+            {folders.map((folder) => {
+              const active = folder.id === activeFolderId;
+              return (
+                <button
+                  key={folder.id}
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked={active}
+                  className={active ? "folder-menu-item active" : "folder-menu-item"}
+                  onClick={() => choose(folder.id)}
+                >
+                  <span>{folder.name}</span>
+                  {active && <CheckGlyph />}
+                </button>
+              );
+            })}
+          </div>,
+          document.body,
+        )}
+    </>
   );
 }
 
@@ -99,7 +137,7 @@ function FolderGlyph() {
       strokeLinejoin="round"
       aria-hidden
     >
-      <path d="M4 20h16a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-8L9.5 4.5A1.5 1.5 0 0 0 8.4 4H4a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1z" />
+      <path d="M3 8a2 2 0 0 1 2-2h3.6a2 2 0 0 1 1.4.6L11.8 8H19a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
     </svg>
   );
 }
