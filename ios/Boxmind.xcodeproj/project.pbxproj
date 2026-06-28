@@ -27,10 +27,13 @@
 		73A3E73D1B2DE6252FF64EE3 /* Brand.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7B18B234BE4F4003DB3D2DB /* Brand.swift */; };
 		79E6ACE6A501E68D95277A50 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAAEAA184095C1F7F62DE604 /* ShareViewController.swift */; };
 		83C2F5F0B9ADEC0524849C12 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F064CE856E889024B78B607B /* HomeView.swift */; };
+		86E833FB8C695A11940972CC /* FoldersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B1A0ABF720B542738DB6EE7 /* FoldersView.swift */; };
 		88B3EC7910C38BF396C8E870 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98BDA03F261743481EF10EDB /* LoginViewModel.swift */; };
 		9241E960307A4D0021B83480 /* CategoriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E99720078333C611C7EB8B8 /* CategoriesView.swift */; };
 		93F1157E9E1D0636A7563F6F /* BoxmindApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E22C59E5AAFA121EA63D1E66 /* BoxmindApp.swift */; };
+		9555DEEA8BDC18A1D8535DD0 /* FolderBookmarksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAC2127CA5D1038404656030 /* FolderBookmarksView.swift */; };
 		9A50D2D8219CCF19A5C8D01B /* TagViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30D4EFEEDD5E6A9DBDEF0487 /* TagViews.swift */; };
+		9D7DEF1A2E4AFE10C65687AB /* Folder.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFCA75DB63F04711F0185B1C /* Folder.swift */; };
 		A8B4B855C73BEB03E6389A03 /* APIConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D9B0ECB212AA7BBBB9CEA8C /* APIConfig.swift */; };
 		AED5A8D041B064EED7C25A6D /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24B05689DB2DDE35CC4D7327 /* SessionStore.swift */; };
 		B27906CD10758A496C570EAE /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3AC5DC983C9B0BF5A71BB25 /* RootView.swift */; };
@@ -77,6 +80,7 @@
 		30D4EFEEDD5E6A9DBDEF0487 /* TagViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagViews.swift; sourceTree = "<group>"; };
 		4BF90ECE4CBD6D9EB9040894 /* Boxmind.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Boxmind.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		529C38C3F88403E0FBDA556B /* EnrichmentState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnrichmentState.swift; sourceTree = "<group>"; };
+		5B1A0ABF720B542738DB6EE7 /* FoldersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoldersView.swift; sourceTree = "<group>"; };
 		6060081B181A2CF9DD15B65D /* AddBookmarkSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddBookmarkSheet.swift; sourceTree = "<group>"; };
 		62826C0270DEB0E47C18DEAC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6371CE009A560FE5D163FBAC /* Bookmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bookmark.swift; sourceTree = "<group>"; };
@@ -87,6 +91,7 @@
 		AA87379A45C3894AE558896E /* AppGroupStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupStore.swift; sourceTree = "<group>"; };
 		B97296C5DA67F850C6760F71 /* APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIError.swift; sourceTree = "<group>"; };
 		BAAEAA184095C1F7F62DE604 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		BAC2127CA5D1038404656030 /* FolderBookmarksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderBookmarksView.swift; sourceTree = "<group>"; };
 		BF22FE39E021E97E4F49FD34 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		C942014E49A745F669E340A2 /* AuthModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthModels.swift; sourceTree = "<group>"; };
 		D7B18B234BE4F4003DB3D2DB /* Brand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Brand.swift; sourceTree = "<group>"; };
@@ -104,6 +109,7 @@
 		F8F599318E4848096E19A484 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		F994AACD3913DA0D230BA613 /* BookmarkRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkRowView.swift; sourceTree = "<group>"; };
 		FA6C5FCE81C4398F12552AA4 /* Boxmind.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Boxmind.entitlements; sourceTree = "<group>"; };
+		FFCA75DB63F04711F0185B1C /* Folder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Folder.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -174,10 +180,20 @@
 				1C8D54AFC4547D2108DD7592 /* Auth */,
 				0C335AB4DC6DB4BDB78F60DE /* Bookmarks */,
 				9F862A412A5035461280C316 /* Categories */,
+				3D1BB57A074F01AD923F7B92 /* Folders */,
 				1168F9F14B3002A910401AC8 /* Home */,
 				FBA620B59B4E136D2D265042 /* Onboarding */,
 			);
 			path = Features;
+			sourceTree = "<group>";
+		};
+		3D1BB57A074F01AD923F7B92 /* Folders */ = {
+			isa = PBXGroup;
+			children = (
+				BAC2127CA5D1038404656030 /* FolderBookmarksView.swift */,
+				5B1A0ABF720B542738DB6EE7 /* FoldersView.swift */,
+			);
+			path = Folders;
 			sourceTree = "<group>";
 		};
 		58748B33D1B890F3582DA2CA /* Account */ = {
@@ -193,6 +209,7 @@
 			children = (
 				C942014E49A745F669E340A2 /* AuthModels.swift */,
 				6371CE009A560FE5D163FBAC /* Bookmark.swift */,
+				FFCA75DB63F04711F0185B1C /* Folder.swift */,
 				9B00A4400AD35D425F4AB374 /* User.swift */,
 			);
 			path = Models;
@@ -422,6 +439,9 @@
 				709D75D5D4C301D04D3C621F /* CategoryBookmarksView.swift in Sources */,
 				3A460F922AC99A2738590E8A /* CategoryLabels.swift in Sources */,
 				196D8627FA128E942F7B48A8 /* EnrichmentState.swift in Sources */,
+				9D7DEF1A2E4AFE10C65687AB /* Folder.swift in Sources */,
+				9555DEEA8BDC18A1D8535DD0 /* FolderBookmarksView.swift in Sources */,
+				86E833FB8C695A11940972CC /* FoldersView.swift in Sources */,
 				83C2F5F0B9ADEC0524849C12 /* HomeView.swift in Sources */,
 				2CD9E96838F2921C22798492 /* KeychainStore.swift in Sources */,
 				080771F7BC2B0700167F3926 /* LoginView.swift in Sources */,

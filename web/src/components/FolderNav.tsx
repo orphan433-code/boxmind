@@ -5,8 +5,7 @@ type Props = {
   activeFolderId: string | null;
   counts: Record<string, number>;
   onSelect: (folderId: string) => void;
-  onCreate: (name: string) => void;
-  onDelete: (folderId: string) => void;
+  onCreate: () => void;
 };
 
 export function FolderNav({
@@ -15,14 +14,7 @@ export function FolderNav({
   counts,
   onSelect,
   onCreate,
-  onDelete,
 }: Props) {
-  function handleCreate() {
-    const name = window.prompt("Название папки");
-    if (!name?.trim()) return;
-    onCreate(name.trim());
-  }
-
   return (
     <section className="sidebar-folders" aria-label="Мои папки">
       <div className="sidebar-folders-header">
@@ -30,7 +22,7 @@ export function FolderNav({
         <button
           type="button"
           className="sidebar-folders-add"
-          onClick={handleCreate}
+          onClick={onCreate}
           aria-label="Создать папку"
           title="Создать папку"
         >
@@ -59,15 +51,6 @@ export function FolderNav({
                 </span>
                 <span className="sidebar-nav-label">{folder.name}</span>
                 <span className="sidebar-nav-count">{counts[folder.id] ?? 0}</span>
-              </button>
-              <button
-                type="button"
-                className="sidebar-folder-delete"
-                onClick={() => onDelete(folder.id)}
-                aria-label={`Удалить папку ${folder.name}`}
-                title="Удалить папку"
-              >
-                ×
               </button>
             </li>
           ))}

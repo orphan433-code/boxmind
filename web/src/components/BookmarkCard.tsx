@@ -2,7 +2,7 @@ import { useState, type CSSProperties } from "react";
 import type { Bookmark, Folder } from "../types";
 import { intentLabelForCategory } from "../utils/browseSections";
 import { isBookmarkEnriching } from "../utils/enrichment";
-import { FolderPicker } from "./FolderPicker";
+import { FolderMenu } from "./FolderMenu";
 
 type Props = {
   bookmark: Bookmark;
@@ -38,6 +38,9 @@ export function BookmarkCard({
       : {}),
   } as CSSProperties;
 
+  const canAssignFolder = Boolean(onAssignFolder) && folders.length > 0;
+  const currentFolder = folders.find((folder) => folder.id === bookmark.folder_id);
+
   return (
     <article
       className={`bookmark-card cat-${bookmark.category || "other"}${hasImage ? " has-image" : ""}${deleting ? " is-deleting" : ""}`}
@@ -69,16 +72,30 @@ export function BookmarkCard({
                 </span>
               )
             )}
+            {currentFolder && (
+              <span className="folder-chip" title={`Папка: ${currentFolder.name}`}>
+                {currentFolder.name}
+              </span>
+            )}
           </div>
-          <button
-            type="button"
-            className="icon-btn"
-            onClick={() => onDelete(bookmark.id)}
-            disabled={deleting}
-            title="Удалить"
-          >
-            ×
-          </button>
+          <div className="bookmark-card-actions">
+            {canAssignFolder && (
+              <FolderMenu
+                folders={folders}
+                activeFolderId={bookmark.folder_id}
+                onAssign={(folderId) => onAssignFolder?.(bookmark.id, folderId)}
+              />
+            )}
+            <button
+              type="button"
+              className="icon-btn"
+              onClick={() => onDelete(bookmark.id)}
+              disabled={deleting}
+              title="Удалить"
+            >
+              ×
+            </button>
+          </div>
         </div>
 
         <div className="bookmark-card-body">
@@ -102,16 +119,6 @@ export function BookmarkCard({
                 />
               ))}
             </div>
-          </div>
-        )}
-
-        {onAssignFolder && folders.length > 0 && (
-          <div className="bookmark-card-folder">
-            <FolderPicker
-              folders={folders}
-              folderId={bookmark.folder_id}
-              onChange={(folderId) => onAssignFolder(bookmark.id, folderId)}
-            />
           </div>
         )}
       </div>

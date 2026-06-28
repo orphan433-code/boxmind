@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { ActiveTagFilter } from "./ActiveTagFilter";
 import { BookmarkList } from "./BookmarkList";
 import type { Folder } from "../types";
@@ -23,6 +24,7 @@ type Props = {
   titleOverride?: string;
   subtitleOverride?: string;
   emptyHintOverride?: string;
+  headerAction?: ReactNode;
   folders?: Folder[];
   onAssignFolder?: (bookmarkId: string, folderId: string | null) => void;
 };
@@ -42,6 +44,7 @@ export function BrowsePanel({
   titleOverride,
   subtitleOverride,
   emptyHintOverride,
+  headerAction,
   folders,
   onAssignFolder,
 }: Props) {
@@ -56,11 +59,14 @@ export function BrowsePanel({
   return (
     <section className="browse-panel">
       <header className="browse-panel-header">
-        <h2>{title}</h2>
-        <p>
-          {panelTotal} {pluralBookmarks(panelTotal)}
-          {subtitle ? ` · ${subtitle}` : ""}
-        </p>
+        <div className="browse-panel-heading">
+          <h2>{title}</h2>
+          <p>
+            {panelTotal} {pluralBookmarks(panelTotal)}
+            {subtitle ? ` · ${subtitle}` : ""}
+          </p>
+        </div>
+        {headerAction && <div className="browse-panel-actions">{headerAction}</div>}
       </header>
 
       {activeTag && <ActiveTagFilter tag={activeTag} onClear={onClearTag} />}

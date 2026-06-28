@@ -13,6 +13,7 @@ import { useAuth } from "../auth/AuthContext";
 import { AddBookmarkForm } from "../components/AddBookmarkForm";
 import { BrowsePanel } from "../components/BrowsePanel";
 import { FolderNav } from "../components/FolderNav";
+import { Modal } from "../components/Modal";
 import { PendingQueue } from "../components/PendingQueue";
 import { SearchBar } from "../components/SearchBar";
 import { SidebarNav } from "../components/SidebarNav";
@@ -38,6 +39,10 @@ export function DashboardPage() {
   const [activeSection, setActiveSection] = useState<BrowseSectionId>("recent");
   const [activeFolderId, setActiveFolderId] = useState<string | null>(null);
   const [folders, setFolders] = useState<Folder[]>([]);
+  const [createFolderOpen, setCreateFolderOpen] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [creatingFolder, setCreatingFolder] = useState(false);
+  const [folderToDelete, setFolderToDelete] = useState<Folder | null>(null);
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -156,24 +161,36 @@ export function DashboardPage() {
     setSidebarOpen(false);
   }
 
-  async function handleCreateFolder(name: string) {
+  function openCreateFolder() {
+    setNewFolderName("");
+    setCreateFolderOpen(true);
+    setSidebarOpen(false);
+  }
+
+  async function handleCreateFolder() {
     if (!token) return;
+    const name = newFolderName.trim();
+    if (!name) return;
+
+    setCreatingFolder(true);
     try {
       const folder = await createFolder(token, name);
       setFolders((prev) => [...prev, folder].sort((a, b) => a.name.localeCompare(b.name, "ru")));
       setActiveFolderId(folder.id);
       setSearchQuery("");
       setError("");
+      setCreateFolderOpen(false);
+      setNewFolderName("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "не удалось создать папку");
+    } finally {
+      setCreatingFolder(false);
     }
   }
 
-  async function handleDeleteFolder(folderId: string) {
-    if (!token) return;
-    const folder = folders.find((item) => item.id === folderId);
-    if (!folder) return;
-    if (!window.confirm(`Удалить папку «${folder.name}»? Ссылки останутся.`)) return;
+  async function confirmDeleteFolder() {
+    if (!token || !folderToDelete) return;
+    const folderId = folderToDelete.id;
 
     try {
       await deleteFolder(token, folderId);
@@ -188,6 +205,8 @@ export function DashboardPage() {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "не удалось удалить папку");
+    } finally {
+      setFolderToDelete(null);
     }
   }
 
@@ -297,8 +316,7 @@ export function DashboardPage() {
           activeFolderId={isSearching ? null : activeFolderId}
           counts={folderCounts}
           onSelect={handleFolderChange}
-          onCreate={handleCreateFolder}
-          onDelete={handleDeleteFolder}
+          onCreate={openCreateFolder}
         />
 
         {bookmarks.length > 0 && folders.length > 0 && (
@@ -370,11 +388,95 @@ export function DashboardPage() {
             emptyHintOverride={
               activeFolder ? "В этой папке пока пусто — добавь ссылки с карточек" : undefined
             }
+            headerAction={
+              activeFolder && !isSearching ? (
+                <button
+                  type="button"
+                  className="panel-action-btn danger"
+                  onClick={() => setFolderToDelete(activeFolder)}
+                >
+                  <TrashIcon />
+                  Удалить папку
+                </button>
+              ) : undefined
+            }
             folders={folders}
             onAssignFolder={handleAssignFolder}
           />
         )}
       </div>
+
+      <Modal
+        open={createFolderOpen}
+        title="Новая папка"
+        onClose={() => setCreateFolderOpen(false)}
+      >
+        <form
+          className="folder-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void handleCreateFolder();
+          }}
+        >
+          <label className="folder-form-field">
+            <span>Название</span>
+            <input
+              type="text"
+              value={newFolderName}
+              onChange={(event) => setNewFolderName(event.target.value)}
+              placeholder="Например, Работа"
+              maxLength={80}
+              autoFocus
+            />
+          </label>
+          <p className="folder-form-hint">
+            Складывай сюда уже сохранённые ссылки — категории от AI не меняются.
+          </p>
+          <div className="modal-actions">
+            <button
+              type="button"
+              className="ghost-btn"
+              onClick={() => setCreateFolderOpen(false)}
+            >
+              Отмена
+            </button>
+            <button
+              type="submit"
+              className="primary-btn"
+              disabled={!newFolderName.trim() || creatingFolder}
+            >
+              {creatingFolder ? "Создаём…" : "Создать"}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal
+        open={Boolean(folderToDelete)}
+        title="Удалить папку"
+        onClose={() => setFolderToDelete(null)}
+      >
+        <p className="modal-text">
+          Удалить папку «{folderToDelete?.name}»? Ссылки внутри останутся — пропадёт только
+          сама подборка.
+        </p>
+        <div className="modal-actions">
+          <button
+            type="button"
+            className="ghost-btn"
+            onClick={() => setFolderToDelete(null)}
+          >
+            Отмена
+          </button>
+          <button
+            type="button"
+            className="danger-btn"
+            onClick={() => void confirmDeleteFolder()}
+          >
+            Удалить
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }
@@ -392,6 +494,25 @@ function MenuIcon() {
       aria-hidden
     >
       <path d="M4 7h16M4 12h16M4 17h16" />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6" />
+      <path d="M10 11v6M14 11v6" />
     </svg>
   );
 }
