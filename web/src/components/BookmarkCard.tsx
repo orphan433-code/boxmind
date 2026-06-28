@@ -1,7 +1,8 @@
 import { useState, type CSSProperties } from "react";
-import type { Bookmark } from "../types";
+import type { Bookmark, Folder } from "../types";
 import { intentLabelForCategory } from "../utils/browseSections";
 import { isBookmarkEnriching } from "../utils/enrichment";
+import { FolderPicker } from "./FolderPicker";
 
 type Props = {
   bookmark: Bookmark;
@@ -11,6 +12,8 @@ type Props = {
   activeTag?: string | null;
   deleting: boolean;
   showIntent?: boolean;
+  folders?: Folder[];
+  onAssignFolder?: (bookmarkId: string, folderId: string | null) => void;
 };
 
 export function BookmarkCard({
@@ -21,6 +24,8 @@ export function BookmarkCard({
   activeTag,
   deleting,
   showIntent = false,
+  folders = [],
+  onAssignFolder,
 }: Props) {
   const [imageOk, setImageOk] = useState(Boolean(bookmark.image_url));
   const hasImage = imageOk && Boolean(bookmark.image_url);
@@ -97,6 +102,16 @@ export function BookmarkCard({
                 />
               ))}
             </div>
+          </div>
+        )}
+
+        {onAssignFolder && folders.length > 0 && (
+          <div className="bookmark-card-folder">
+            <FolderPicker
+              folders={folders}
+              folderId={bookmark.folder_id}
+              onChange={(folderId) => onAssignFolder(bookmark.id, folderId)}
+            />
           </div>
         )}
       </div>

@@ -17,6 +17,11 @@ struct MainTabView: View {
                     Label("Категории", systemImage: "square.grid.2x2.fill")
                 }
 
+            FoldersView(viewModel: viewModel)
+                .tabItem {
+                    Label("Моё", systemImage: "folder.fill")
+                }
+
             AccountView(viewModel: viewModel)
                 .tabItem {
                     Label("Аккаунт", systemImage: "person.fill")

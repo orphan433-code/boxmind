@@ -5,35 +5,50 @@ struct BookmarkDetailView: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.dismiss) private var dismiss
 
-    let bookmark: Bookmark
+    let bookmarkID: String
     @Bindable var viewModel: BookmarksViewModel
 
     @State private var showDeleteConfirm = false
 
+    private var bookmark: Bookmark? {
+        viewModel.bookmarks.first { $0.id == bookmarkID }
+    }
+
     var body: some View {
+        Group {
+            if let bookmark {
+                detailContent(for: bookmark)
+            } else {
+                ContentUnavailableView("Закладка не найдена", systemImage: "link.badge.plus")
+            }
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    @ViewBuilder
+    private func detailContent(for bookmark: Bookmark) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 if bookmark.hasImage {
-                    hero
+                    hero(for: bookmark)
                 }
-                header
+                header(for: bookmark)
                 if !bookmark.description.isEmpty {
                     Text(bookmark.description)
                         .font(.body)
                         .foregroundStyle(.secondary)
                 }
                 if !bookmark.tags.isEmpty {
-                    tags
+                    tags(for: bookmark)
                 }
-                metadata
+                metadata(for: bookmark)
             }
             .padding(20)
         }
-        .background(Color(.systemGroupedBackground))
-        .navigationTitle("")
-        .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom) {
-            actionBar
+            actionBar(for: bookmark)
         }
         .confirmationDialog("Удалить закладку?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
             Button("Удалить", role: .destructive) {
@@ -46,7 +61,7 @@ struct BookmarkDetailView: View {
         }
     }
 
-    private var hero: some View {
+    private func hero(for bookmark: Bookmark) -> some View {
         BookmarkThumbnail(bookmark: bookmark, size: heroSize, cornerRadius: 20)
             .frame(maxWidth: .infinity)
             .shadow(color: .black.opacity(0.12), radius: 12, y: 6)
@@ -54,7 +69,7 @@ struct BookmarkDetailView: View {
 
     private var heroSize: CGFloat { 200 }
 
-    private var header: some View {
+    private func header(for bookmark: Bookmark) -> some View {
         VStack(alignment: .leading, spacing: 14) {
             if !bookmark.hasImage {
                 BookmarkThumbnail(bookmark: bookmark, size: 64, cornerRadius: 16)
@@ -62,7 +77,7 @@ struct BookmarkDetailView: View {
 
             VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 8) {
-                    categoryChip
+                    categoryChip(for: bookmark)
 
                     if EnrichmentState.isEnriching(bookmark) {
                         HStack(spacing: 4) {
@@ -82,7 +97,7 @@ struct BookmarkDetailView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private var categoryChip: some View {
+    private func categoryChip(for bookmark: Bookmark) -> some View {
         Label(
             CategoryLabels.label(for: bookmark.category),
             systemImage: CategoryLabels.icon(for: bookmark.category)
@@ -95,7 +110,7 @@ struct BookmarkDetailView: View {
         .clipShape(Capsule())
     }
 
-    private var tags: some View {
+    private func tags(for bookmark: Bookmark) -> some View {
         FlowLayout(spacing: 8) {
             ForEach(bookmark.tags, id: \.self) { tag in
                 TagChip(tag: tag)
@@ -104,8 +119,12 @@ struct BookmarkDetailView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private var metadata: some View {
+    private func metadata(for bookmark: Bookmark) -> some View {
         VStack(spacing: 0) {
+            if !viewModel.folders.isEmpty {
+                folderRow(for: bookmark)
+                Divider()
+            }
             metaRow(title: "Добавлено", value: bookmark.createdAt.formatted(date: .abbreviated, time: .shortened))
             Divider()
             metaRow(title: "Ссылка", value: bookmark.readableHost ?? "Открыть сайт")
@@ -114,6 +133,35 @@ struct BookmarkDetailView: View {
         .padding(.vertical, 4)
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+    }
+
+    private func folderRow(for bookmark: Bookmark) -> some View {
+        HStack {
+            Text("Папка")
+                .foregroundStyle(.secondary)
+            Spacer()
+            Picker("Папка", selection: folderSelection(for: bookmark)) {
+                Text("Без папки").tag(Optional<String>.none)
+                ForEach(viewModel.folders) { folder in
+                    Text(folder.name).tag(Optional(folder.id))
+                }
+            }
+            .labelsHidden()
+            .pickerStyle(.menu)
+        }
+        .font(.subheadline)
+        .padding(.vertical, 12)
+    }
+
+    private func folderSelection(for bookmark: Bookmark) -> Binding<String?> {
+        Binding(
+            get: { viewModel.bookmarks.first(where: { $0.id == bookmark.id })?.folderID },
+            set: { newValue in
+                Task {
+                    await viewModel.assignFolder(newValue, to: bookmark, session: session)
+                }
+            }
+        )
     }
 
     private func metaRow(title: String, value: String) -> some View {
@@ -128,7 +176,7 @@ struct BookmarkDetailView: View {
         .padding(.vertical, 12)
     }
 
-    private var actionBar: some View {
+    private func actionBar(for bookmark: Bookmark) -> some View {
         HStack(spacing: 12) {
             Button {
                 if let url = URL(string: bookmark.url) { openURL(url) }

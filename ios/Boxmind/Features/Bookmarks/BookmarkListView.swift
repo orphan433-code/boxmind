@@ -45,7 +45,7 @@ struct BookmarkListView: View {
             }
             .listStyle(.plain)
             .navigationDestination(item: $selected) { bookmark in
-                BookmarkDetailView(bookmark: bookmark, viewModel: viewModel)
+                BookmarkDetailView(bookmarkID: bookmark.id, viewModel: viewModel)
             }
         }
     }

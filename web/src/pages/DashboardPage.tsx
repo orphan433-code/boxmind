@@ -1,17 +1,22 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  assignBookmarkFolder,
   createBookmark,
+  createFolder,
   deleteBookmark,
+  deleteFolder,
   getBookmark,
   listBookmarks,
+  listFolders,
 } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import { AddBookmarkForm } from "../components/AddBookmarkForm";
 import { BrowsePanel } from "../components/BrowsePanel";
+import { FolderNav } from "../components/FolderNav";
 import { PendingQueue } from "../components/PendingQueue";
 import { SearchBar } from "../components/SearchBar";
 import { SidebarNav } from "../components/SidebarNav";
-import type { PendingBookmark } from "../types";
+import type { Folder, PendingBookmark } from "../types";
 import {
   bookmarksForSection,
   countBySection,
@@ -31,6 +36,8 @@ export function DashboardPage() {
   const [pending, setPending] = useState<PendingBookmark[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSection, setActiveSection] = useState<BrowseSectionId>("recent");
+  const [activeFolderId, setActiveFolderId] = useState<string | null>(null);
+  const [folders, setFolders] = useState<Folder[]>([]);
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -44,8 +51,12 @@ export function DashboardPage() {
     setError("");
     setLoading(true);
     try {
-      const data = await listBookmarks(token);
+      const [data, folderData] = await Promise.all([
+        listBookmarks(token),
+        listFolders(token),
+      ]);
       setBookmarks(data);
+      setFolders(folderData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "не удалось загрузить");
     } finally {
@@ -87,7 +98,13 @@ export function DashboardPage() {
 
   useEffect(() => {
     setActiveTag(null);
-  }, [activeSection, searchQuery]);
+  }, [activeSection, activeFolderId, searchQuery]);
+
+  useEffect(() => {
+    if (activeFolderId && !folders.some((folder) => folder.id === activeFolderId)) {
+      setActiveFolderId(null);
+    }
+  }, [folders, activeFolderId]);
 
   useEffect(() => {
     if (!sidebarOpen) return;
@@ -98,12 +115,28 @@ export function DashboardPage() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [sidebarOpen]);
 
+  const folderCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const folder of folders) {
+      counts[folder.id] = bookmarks.filter((bookmark) => bookmark.folder_id === folder.id).length;
+    }
+    return counts;
+  }, [folders, bookmarks]);
+
+  const activeFolder = useMemo(
+    () => folders.find((folder) => folder.id === activeFolderId) ?? null,
+    [folders, activeFolderId],
+  );
+
   const inPanel = useMemo(() => {
     if (isSearching) {
       return searchBookmarks(bookmarks, searchQuery);
     }
+    if (activeFolderId) {
+      return bookmarks.filter((bookmark) => bookmark.folder_id === activeFolderId);
+    }
     return bookmarksForSection(bookmarks, activeSection);
-  }, [bookmarks, activeSection, isSearching, searchQuery]);
+  }, [bookmarks, activeSection, activeFolderId, isSearching, searchQuery]);
 
   const visibleBookmarks = useMemo(() => {
     if (!activeTag) return inPanel;
@@ -112,8 +145,62 @@ export function DashboardPage() {
 
   function handleSectionChange(sectionId: BrowseSectionId) {
     setSearchQuery("");
+    setActiveFolderId(null);
     setActiveSection(sectionId);
     setSidebarOpen(false);
+  }
+
+  function handleFolderChange(folderId: string) {
+    setSearchQuery("");
+    setActiveFolderId(folderId);
+    setSidebarOpen(false);
+  }
+
+  async function handleCreateFolder(name: string) {
+    if (!token) return;
+    try {
+      const folder = await createFolder(token, name);
+      setFolders((prev) => [...prev, folder].sort((a, b) => a.name.localeCompare(b.name, "ru")));
+      setActiveFolderId(folder.id);
+      setSearchQuery("");
+      setError("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "не удалось создать папку");
+    }
+  }
+
+  async function handleDeleteFolder(folderId: string) {
+    if (!token) return;
+    const folder = folders.find((item) => item.id === folderId);
+    if (!folder) return;
+    if (!window.confirm(`Удалить папку «${folder.name}»? Ссылки останутся.`)) return;
+
+    try {
+      await deleteFolder(token, folderId);
+      setFolders((prev) => prev.filter((item) => item.id !== folderId));
+      setBookmarks((prev) =>
+        prev.map((bookmark) =>
+          bookmark.folder_id === folderId ? { ...bookmark, folder_id: undefined } : bookmark,
+        ),
+      );
+      if (activeFolderId === folderId) {
+        setActiveFolderId(null);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "не удалось удалить папку");
+    }
+  }
+
+  async function handleAssignFolder(bookmarkId: string, folderId: string | null) {
+    if (!token) return;
+    try {
+      const updated = await assignBookmarkFolder(token, bookmarkId, folderId);
+      setBookmarks((prev) =>
+        prev.map((bookmark) => (bookmark.id === updated.id ? updated : bookmark)),
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "не удалось переместить ссылку");
+    }
   }
 
   function handleTagClick(tag: string) {
@@ -205,10 +292,23 @@ export function DashboardPage() {
           className="sidebar-search"
         />
 
+        <FolderNav
+          folders={folders}
+          activeFolderId={isSearching ? null : activeFolderId}
+          counts={folderCounts}
+          onSelect={handleFolderChange}
+          onCreate={handleCreateFolder}
+          onDelete={handleDeleteFolder}
+        />
+
+        {bookmarks.length > 0 && folders.length > 0 && (
+          <div className="sidebar-nav-divider" />
+        )}
+
         {bookmarks.length > 0 && (
           <SidebarNav
             sections={sections}
-            active={isSearching ? null : activeSection}
+            active={isSearching || activeFolderId ? null : activeSection}
             counts={sectionCounts}
             onChange={handleSectionChange}
           />
@@ -253,7 +353,7 @@ export function DashboardPage() {
 
         {bookmarks.length > 0 && (
           <BrowsePanel
-            key={isSearching ? "search" : activeSection}
+            key={isSearching ? "search" : activeFolderId ?? activeSection}
             activeSection={activeSection}
             activeTag={activeTag}
             onClearTag={() => setActiveTag(null)}
@@ -262,9 +362,16 @@ export function DashboardPage() {
             onDelete={handleDelete}
             onTagClick={handleTagClick}
             deletingId={deletingId}
-            showIntent={showIntentOnCards(activeSection)}
+            showIntent={showIntentOnCards(activeSection) && !activeFolderId}
             isSearching={isSearching}
             searchQuery={searchQuery}
+            titleOverride={activeFolder ? activeFolder.name : undefined}
+            subtitleOverride={activeFolder ? "твоя подборка" : undefined}
+            emptyHintOverride={
+              activeFolder ? "В этой папке пока пусто — добавь ссылки с карточек" : undefined
+            }
+            folders={folders}
+            onAssignFolder={handleAssignFolder}
           />
         )}
       </div>

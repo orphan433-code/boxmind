@@ -24,12 +24,13 @@ func (r *BookmarkRepository) Create(ctx context.Context, userID string, input do
 	const query = `
 		INSERT INTO bookmarks (user_id, url, title, description, image_url, category, tags, enriched)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, FALSE)
-		RETURNING id, user_id, url, title, description, image_url, category, tags, enriched, created_at, updated_at
+		RETURNING id, user_id, url, title, description, image_url, category, tags, folder_id, enriched, created_at, updated_at
 	`
 
 	var b domain.Bookmark
+	var folderID *string
 	err := r.db.Pool.QueryRow(ctx, query, userID, input.URL, input.Title, input.Description, input.ImageURL, input.Category, input.Tags).Scan(
-		&b.ID, &b.UserID, &b.URL, &b.Title, &b.Description, &b.ImageURL, &b.Category, &b.Tags, &b.Enriched, &b.CreatedAt, &b.UpdatedAt,
+		&b.ID, &b.UserID, &b.URL, &b.Title, &b.Description, &b.ImageURL, &b.Category, &b.Tags, &folderID, &b.Enriched, &b.CreatedAt, &b.UpdatedAt,
 	)
 	if err != nil {
 		if isUniqueViolation(err) {
@@ -37,6 +38,7 @@ func (r *BookmarkRepository) Create(ctx context.Context, userID string, input do
 		}
 		return domain.Bookmark{}, fmt.Errorf("create bookmark: %w", err)
 	}
+	b.FolderID = stringFromPtr(folderID)
 
 	return b, nil
 }
@@ -102,7 +104,7 @@ func (r *BookmarkRepository) MarkEnriched(ctx context.Context, userID, bookmarkI
 
 func (r *BookmarkRepository) ListByUserID(ctx context.Context, userID string) ([]domain.Bookmark, error) {
 	const query = `
-		SELECT id, user_id, url, title, description, image_url, category, tags, enriched, created_at, updated_at
+		SELECT id, user_id, url, title, description, image_url, category, tags, folder_id, enriched, created_at, updated_at
 		FROM bookmarks
 		WHERE user_id = $1
 		ORDER BY created_at DESC
@@ -116,9 +118,9 @@ func (r *BookmarkRepository) ListByUserID(ctx context.Context, userID string) ([
 
 	bookmarks := make([]domain.Bookmark, 0)
 	for rows.Next() {
-		var b domain.Bookmark
-		if err := rows.Scan(&b.ID, &b.UserID, &b.URL, &b.Title, &b.Description, &b.ImageURL, &b.Category, &b.Tags, &b.Enriched, &b.CreatedAt, &b.UpdatedAt); err != nil {
-			return nil, fmt.Errorf("scan bookmark: %w", err)
+		b, err := scanBookmark(rows)
+		if err != nil {
+			return nil, err
 		}
 		bookmarks = append(bookmarks, b)
 	}
@@ -132,20 +134,38 @@ func (r *BookmarkRepository) ListByUserID(ctx context.Context, userID string) ([
 
 func (r *BookmarkRepository) GetByIDForUser(ctx context.Context, userID, bookmarkID string) (domain.Bookmark, error) {
 	const query = `
-		SELECT id, user_id, url, title, description, image_url, category, tags, enriched, created_at, updated_at
+		SELECT id, user_id, url, title, description, image_url, category, tags, folder_id, enriched, created_at, updated_at
 		FROM bookmarks
 		WHERE id = $1 AND user_id = $2
 	`
 
-	var b domain.Bookmark
-	err := r.db.Pool.QueryRow(ctx, query, bookmarkID, userID).Scan(
-		&b.ID, &b.UserID, &b.URL, &b.Title, &b.Description, &b.ImageURL, &b.Category, &b.Tags, &b.Enriched, &b.CreatedAt, &b.UpdatedAt,
-	)
+	row := r.db.Pool.QueryRow(ctx, query, bookmarkID, userID)
+	b, err := scanBookmark(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return domain.Bookmark{}, domain.ErrBookmarkNotFound
 		}
 		return domain.Bookmark{}, fmt.Errorf("get bookmark: %w", err)
+	}
+
+	return b, nil
+}
+
+func (r *BookmarkRepository) UpdateFolderID(ctx context.Context, userID, bookmarkID, folderID string) (domain.Bookmark, error) {
+	const query = `
+		UPDATE bookmarks
+		SET folder_id = NULLIF($1, '')::uuid, updated_at = now()
+		WHERE id = $2 AND user_id = $3
+		RETURNING id, user_id, url, title, description, image_url, category, tags, folder_id, enriched, created_at, updated_at
+	`
+
+	row := r.db.Pool.QueryRow(ctx, query, folderID, bookmarkID, userID)
+	b, err := scanBookmark(row)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.Bookmark{}, domain.ErrBookmarkNotFound
+		}
+		return domain.Bookmark{}, fmt.Errorf("update bookmark folder: %w", err)
 	}
 
 	return b, nil
@@ -201,4 +221,27 @@ func (r *BookmarkRepository) Delete(ctx context.Context, userID, bookmarkID stri
 	}
 
 	return nil
+}
+
+type bookmarkRow interface {
+	Scan(dest ...any) error
+}
+
+func scanBookmark(row bookmarkRow) (domain.Bookmark, error) {
+	var b domain.Bookmark
+	var folderID *string
+	if err := row.Scan(
+		&b.ID, &b.UserID, &b.URL, &b.Title, &b.Description, &b.ImageURL, &b.Category, &b.Tags, &folderID, &b.Enriched, &b.CreatedAt, &b.UpdatedAt,
+	); err != nil {
+		return domain.Bookmark{}, fmt.Errorf("scan bookmark: %w", err)
+	}
+	b.FolderID = stringFromPtr(folderID)
+	return b, nil
+}
+
+func stringFromPtr(value *string) string {
+	if value == nil {
+		return ""
+	}
+	return *value
 }

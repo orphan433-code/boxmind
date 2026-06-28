@@ -59,6 +59,27 @@ struct APIClient: Sendable {
         try await send(path: "/bookmarks/\(id)", method: "DELETE", token: token)
     }
 
+    func listFolders(token: String) async throws -> [BookmarkFolder] {
+        try await get("/folders", token: token)
+    }
+
+    func createFolder(token: String, name: String) async throws -> BookmarkFolder {
+        try await post("/folders", body: CreateFolderRequest(name: name), token: token)
+    }
+
+    func deleteFolder(token: String, id: String) async throws {
+        try await send(path: "/folders/\(id)", method: "DELETE", token: token)
+    }
+
+    func assignBookmarkFolder(token: String, bookmarkID: String, folderID: String?) async throws -> Bookmark {
+        try await request(
+            path: "/bookmarks/\(bookmarkID)/folder",
+            method: "PUT",
+            body: try JSONEncoder().encode(AssignBookmarkFolderRequest(folderID: folderID)),
+            token: token
+        )
+    }
+
     // MARK: - HTTP helpers
 
     /// Joins `baseURL` (which may include a path like `/api/v1`) with an endpoint path.

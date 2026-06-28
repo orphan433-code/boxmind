@@ -71,6 +71,7 @@ struct BookmarkRowView: View {
             imageURL: "",
             category: "learning",
             tags: ["курс", "golang"],
+            folderID: nil,
             enriched: false,
             createdAt: .now,
             updatedAt: .now

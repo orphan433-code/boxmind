@@ -1,5 +1,6 @@
 import { ActiveTagFilter } from "./ActiveTagFilter";
 import { BookmarkList } from "./BookmarkList";
+import type { Folder } from "../types";
 import type { BrowseSectionId } from "../utils/browseSections";
 import {
   sectionEmptyHint,
@@ -19,6 +20,11 @@ type Props = {
   showIntent: boolean;
   isSearching: boolean;
   searchQuery: string;
+  titleOverride?: string;
+  subtitleOverride?: string;
+  emptyHintOverride?: string;
+  folders?: Folder[];
+  onAssignFolder?: (bookmarkId: string, folderId: string | null) => void;
 };
 
 export function BrowsePanel({
@@ -33,14 +39,19 @@ export function BrowsePanel({
   showIntent,
   isSearching,
   searchQuery,
+  titleOverride,
+  subtitleOverride,
+  emptyHintOverride,
+  folders,
+  onAssignFolder,
 }: Props) {
   const subtitle = isSearching
     ? `по запросу «${searchQuery.trim()}»`
-    : sectionPanelSubtitle(activeSection);
+    : subtitleOverride ?? sectionPanelSubtitle(activeSection);
 
   const title = isSearching
     ? "Результаты поиска"
-    : sectionPanelTitle(activeSection);
+    : titleOverride ?? sectionPanelTitle(activeSection);
 
   return (
     <section className="browse-panel">
@@ -62,10 +73,13 @@ export function BrowsePanel({
         deletingId={deletingId}
         showIntent={showIntent || isSearching}
         emptyHint={
-          isSearching
+          emptyHintOverride ??
+          (isSearching
             ? "Ничего не нашлось — попробуй другие слова"
-            : sectionEmptyHint(activeSection)
+            : sectionEmptyHint(activeSection))
         }
+        folders={folders}
+        onAssignFolder={onAssignFolder}
       />
     </section>
   );

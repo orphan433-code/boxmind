@@ -8,4 +8,6 @@ var (
 	ErrInvalidOTP        = errors.New("invalid or expired otp")
 	ErrBookmarkNotFound      = errors.New("bookmark not found")
 	ErrBookmarkAlreadyExists = errors.New("bookmark already exists")
+	ErrFolderNotFound        = errors.New("folder not found")
+	ErrFolderAlreadyExists   = errors.New("folder already exists")
 )

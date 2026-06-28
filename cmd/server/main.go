@@ -63,6 +63,10 @@ func main() {
 	bookmarkService := service.NewBookmarkServiceWithCacheAndMovie(bookmarkRepo, cacheRepo, geminiEnricher, imageFetcher, metaFallback, movieMetadata)
 	bookmarkHandler := handler.NewBookmarkHandler(bookmarkService)
 
+	folderRepo := postgres.NewFolderRepository(db)
+	folderService := service.NewFolderServiceWithBookmarks(folderRepo, bookmarkRepo)
+	folderHandler := handler.NewFolderHandler(folderService)
+
 	otpRepo := postgres.NewOTPRepository(db)
 	tokenProvider := jwt.NewProvider(cfg.JWTSecret, cfg.JWTTTL)
 	emailSender := service.NewEmailSender(cfg.Mail)
@@ -118,6 +122,11 @@ func main() {
 	protected.Get("/bookmarks", bookmarkHandler.List)
 	protected.Get("/bookmarks/:id", bookmarkHandler.GetByID)
 	protected.Delete("/bookmarks/:id", bookmarkHandler.Delete)
+	protected.Post("/folders", folderHandler.Create)
+	protected.Get("/folders", folderHandler.List)
+	protected.Patch("/folders/:id", folderHandler.Update)
+	protected.Delete("/folders/:id", folderHandler.Delete)
+	protected.Put("/bookmarks/:bookmarkId/folder", folderHandler.AssignBookmark)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)

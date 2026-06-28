@@ -11,6 +11,7 @@ type Bookmark struct {
 	ImageURL    string    `json:"image_url"`
 	Category    string    `json:"category"`
 	Tags        []string  `json:"tags"`
+	FolderID    string    `json:"folder_id,omitempty"`
 	Enriched    bool      `json:"enriched"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`

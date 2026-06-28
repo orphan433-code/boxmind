@@ -1,4 +1,4 @@
-import type { Bookmark, VerifyLoginResult } from '../types'
+import type { Bookmark, Folder, VerifyLoginResult } from '../types'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api/v1'
 
@@ -73,4 +73,38 @@ export function getBookmark(token: string, id: string) {
 
 export function deleteBookmark(token: string, id: string) {
   return request<void>(`/bookmarks/${id}`, { method: 'DELETE' }, token)
+}
+
+export function listFolders(token: string) {
+  return request<Folder[]>('/folders', { method: 'GET' }, token)
+}
+
+export function createFolder(token: string, name: string) {
+  return request<Folder>(
+    '/folders',
+    {
+      method: 'POST',
+      body: JSON.stringify({ name }),
+    },
+    token,
+  )
+}
+
+export function deleteFolder(token: string, id: string) {
+  return request<void>(`/folders/${id}`, { method: 'DELETE' }, token)
+}
+
+export function assignBookmarkFolder(
+  token: string,
+  bookmarkId: string,
+  folderId: string | null,
+) {
+  return request<Bookmark>(
+    `/bookmarks/${bookmarkId}/folder`,
+    {
+      method: 'PUT',
+      body: JSON.stringify({ folder_id: folderId }),
+    },
+    token,
+  )
 }

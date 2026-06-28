@@ -9,6 +9,7 @@ struct Bookmark: Codable, Identifiable, Equatable, Hashable, Sendable {
     let imageURL: String
     let category: String
     let tags: [String]
+    let folderID: String?
     let enriched: Bool
     let createdAt: Date
     let updatedAt: Date
@@ -22,6 +23,7 @@ struct Bookmark: Codable, Identifiable, Equatable, Hashable, Sendable {
         case imageURL = "image_url"
         case category
         case tags
+        case folderID = "folder_id"
         case enriched
         case createdAt = "created_at"
         case updatedAt = "updated_at"
