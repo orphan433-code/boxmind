@@ -83,6 +83,7 @@ export function BookmarkActions({
               <div className="sheet-handle" aria-hidden />
 
               <header className="sheet-header">
+                <p className="sheet-eyebrow">Закладка</p>
                 <h3>{bookmark.title || bookmark.url}</h3>
               </header>
 
@@ -92,20 +93,26 @@ export function BookmarkActions({
                   <div className="sheet-list">
                     <button
                       type="button"
-                      className="sheet-item"
+                      className={`sheet-item${!bookmark.folder_id ? " is-selected" : ""}`}
                       onClick={() => choose(null)}
                     >
-                      <span>Без папки</span>
+                      <span className="sheet-item-main">
+                        <FolderGlyph muted />
+                        <span>Без папки</span>
+                      </span>
                       {!bookmark.folder_id && <CheckGlyph />}
                     </button>
                     {folders.map((folder) => (
                       <button
                         key={folder.id}
                         type="button"
-                        className="sheet-item"
+                        className={`sheet-item${bookmark.folder_id === folder.id ? " is-selected" : ""}`}
                         onClick={() => choose(folder.id)}
                       >
-                        <span>{folder.name}</span>
+                        <span className="sheet-item-main">
+                          <FolderGlyph />
+                          <span>{folder.name}</span>
+                        </span>
                         {bookmark.folder_id === folder.id && <CheckGlyph />}
                       </button>
                     ))}
@@ -113,43 +120,35 @@ export function BookmarkActions({
                 </section>
               )}
 
-              <section className="sheet-section">
-                <p className="sheet-section-label">Действия</p>
-                <div className="sheet-list">
-                  <a
-                    className="sheet-item"
-                    href={bookmark.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={close}
-                  >
-                    <span>Открыть ссылку</span>
-                    <ExternalGlyph />
-                  </a>
+              <div className="sheet-divider" />
 
-                  {confirmDelete ? (
-                    <button
-                      type="button"
-                      className="sheet-item danger"
-                      onClick={handleDelete}
-                      disabled={deleting}
-                    >
+              <div className="sheet-list">
+                {confirmDelete ? (
+                  <button
+                    type="button"
+                    className="sheet-item danger"
+                    onClick={handleDelete}
+                    disabled={deleting}
+                  >
+                    <span className="sheet-item-main">
+                      <TrashGlyph />
                       <span>Точно удалить?</span>
+                    </span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="sheet-item danger"
+                    onClick={() => setConfirmDelete(true)}
+                    disabled={deleting}
+                  >
+                    <span className="sheet-item-main">
                       <TrashGlyph />
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      className="sheet-item danger"
-                      onClick={() => setConfirmDelete(true)}
-                      disabled={deleting}
-                    >
                       <span>Удалить закладку</span>
-                      <TrashGlyph />
-                    </button>
-                  )}
-                </div>
-              </section>
+                    </span>
+                  </button>
+                )}
+              </div>
 
               <button type="button" className="sheet-cancel" onClick={close}>
                 Отмена
@@ -190,20 +189,21 @@ function CheckGlyph() {
   );
 }
 
-function ExternalGlyph() {
+function FolderGlyph({ muted = false }: { muted?: boolean }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="17"
+      height="17"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
+      className={muted ? "sheet-icon-muted" : undefined}
       aria-hidden
     >
-      <path d="M14 4h6v6M20 4l-9 9M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5" />
+      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
     </svg>
   );
 }
