@@ -2,7 +2,7 @@ import { useState, type CSSProperties } from "react";
 import type { Bookmark, Folder } from "../types";
 import { intentLabelForCategory } from "../utils/browseSections";
 import { isBookmarkEnriching } from "../utils/enrichment";
-import { FolderMenu } from "./FolderMenu";
+import { BookmarkActions } from "./BookmarkActions";
 
 type Props = {
   bookmark: Bookmark;
@@ -79,22 +79,14 @@ export function BookmarkCard({
             )}
           </div>
           <div className="bookmark-card-actions">
-            {canAssignFolder && (
-              <FolderMenu
-                folders={folders}
-                activeFolderId={bookmark.folder_id}
-                onAssign={(folderId) => onAssignFolder?.(bookmark.id, folderId)}
-              />
-            )}
-            <button
-              type="button"
-              className="icon-btn"
-              onClick={() => onDelete(bookmark.id)}
-              disabled={deleting}
-              title="Удалить"
-            >
-              ×
-            </button>
+            <BookmarkActions
+              bookmark={bookmark}
+              folders={folders}
+              canAssignFolder={canAssignFolder}
+              deleting={deleting}
+              onAssignFolder={onAssignFolder}
+              onDelete={onDelete}
+            />
           </div>
         </div>
 
