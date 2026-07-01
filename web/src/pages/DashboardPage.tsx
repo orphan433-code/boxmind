@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { usePageMeta } from "../hooks/usePageMeta";
 import {
   assignBookmarkFolder,
   createBookmark,
@@ -31,6 +33,14 @@ import { bookmarkUrlsMatch } from "../utils/url";
 
 export function DashboardPage() {
   const { token, user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  usePageMeta({
+    title: "Приложение - Boxmind",
+    description: "Личная библиотека ссылок в Boxmind.",
+    path: "/app",
+    noindex: true,
+  });
   const [bookmarks, setBookmarks] = useState<
     Awaited<ReturnType<typeof listBookmarks>>
   >([]);
@@ -333,7 +343,14 @@ export function DashboardPage() {
         )}
 
         <div className="sidebar-footer">
-          <button type="button" className="ghost-btn sidebar-logout" onClick={logout}>
+          <button
+            type="button"
+            className="ghost-btn sidebar-logout"
+            onClick={() => {
+              logout();
+              navigate("/login", { replace: true });
+            }}
+          >
             Выйти
           </button>
         </div>

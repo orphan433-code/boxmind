@@ -1,10 +1,22 @@
 import { useState, type FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { requestLogin, verifyLogin } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import { TAGLINE } from "../brand";
+import { usePageMeta } from "../hooks/usePageMeta";
+import { usePublicPageScroll } from "../hooks/usePublicPageScroll";
 
 export function LoginPage() {
   const { login } = useAuth();
+  const navigate = useNavigate();
+
+  usePublicPageScroll();
+  usePageMeta({
+    title: "Вход - Boxmind",
+    description: "Вход в Boxmind по email и одноразовому коду.",
+    path: "/login",
+    noindex: true,
+  });
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [step, setStep] = useState<"email" | "code">("email");
@@ -32,6 +44,7 @@ export function LoginPage() {
     try {
       const result = await verifyLogin(email.trim(), code.trim());
       login(result.tokens.access_token, result.user);
+      navigate("/app", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "ошибка");
     } finally {
@@ -108,6 +121,10 @@ export function LoginPage() {
             {error}
           </p>
         )}
+
+        <p className="login-back-home">
+          <Link to="/">← На главную</Link>
+        </p>
       </div>
     </div>
   );

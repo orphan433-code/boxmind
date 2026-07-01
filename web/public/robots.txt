@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Disallow: /app
+Disallow: /login
+
+Sitemap: https://app.boxmind.link/sitemap.xml
