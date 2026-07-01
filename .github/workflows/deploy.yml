@@ -76,7 +76,7 @@ jobs:
           DB_POSTGRE_PASSWORD=${{ secrets.DB_POSTGRE_PASSWORD }}
           DB_POSTGRE_NAME=${{ secrets.DB_POSTGRE_NAME }}
           JWT_SECRET=${{ secrets.JWT_SECRET }}
-          JWT_TTL=24h
+          JWT_TTL=720h
           OTP_TTL=10m
           GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL=${{ secrets.GEMINI_MODEL }}

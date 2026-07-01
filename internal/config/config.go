@@ -74,7 +74,7 @@ func Load() Config {
 
 	jwtTTL, err := time.ParseDuration(os.Getenv("JWT_TTL"))
 	if err != nil || jwtTTL == 0 {
-		jwtTTL = 24 * time.Hour
+		jwtTTL = 720 * time.Hour
 	}
 
 	otpTTL, err := time.ParseDuration(os.Getenv("OTP_TTL"))
